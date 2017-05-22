@@ -9,7 +9,8 @@ userinput   EQU     $00A0           * user input
 minAddress  EQU     $00000000       * min address
 maxAddress  EQU     $00FFFE00       * max address
 storage     EQU     $0000F000       * stores instructions
-compareEnd  EQU     $0000FFF0       * stores end address in good form          
+compareEnd  EQU     $0000FFF0       * stores end address in good form    
+run         EQU     $00B0 
 
 inputMin    EQU     $0A00
 inputMax    EQU     $0B00
@@ -1669,19 +1670,81 @@ FINISHED
         MOVE        #14,D0              * load trap task 14 into D0
         TRAP        #15
         
-        BRA         STOP                * branch to STOP
-                       
+        BRA         FINISHED_NEXT        * branch to STOP
+ 
+ * Asks user if they want to use the program again --------------------
+FINISHED_NEXT        
+        LEA         RUNAGAIN,A1         * load run again meesage
+        MOVE        #14,D0              * load trap task 14 into D0
+        TRAP        #15
+        
+        LEA         run,A1              * load end address to be stored
+        MOVE.B      #2,D0               * move task #2 to D0
+        TRAP        #15 
+       
+        CLR         D1                  * clear D1       
+        MOVE.B      (A1),D1             * move content in A1 to D1
+        CMPI.B      #$79,D1             * compare if input is y
+        BEQ         RUN_AGAIN           * branch if equal
+        CMPI.B      #$59,D1             * compare if input is Y
+        BEQ         RUN_AGAIN           * branch if equal
+        CMPI.B      #$6E,D1             * compare if input is n
+        BEQ         STOP                * branch if equal
+        CMPI.B      #$4E,D1             * compare if input is N
+        BEQ         STOP                * branch if equal
+        
+        BRA         BAD_RERRUN          * branch to BAD_RERRUN
+
+* In case the user input for rerrun is not valid --------------------
+BAD_RERRUN
+        LEA         BAD_ANSWER,A1       * load bad answer
+        MOVE        #14,D0              * load trap task 14 into D0
+        TRAP        #15
+        
+        LEA         run,A1              * load end address to be stored
+        MOVE.B      #2,D0               * move task #2 to D0
+        TRAP        #15 
+
+        CLR         D1                  * clear D1       
+        MOVE.B      (A1),D1             * move content in A1 to D1
+        CMPI.B      #$79,D1             * compare if input is y
+        BEQ         RUN_AGAIN           * branch if equal
+        CMPI.B      #$59,D1             * compare if input is Y
+        BEQ         RUN_AGAIN           * branch if equal
+        CMPI.B      #$6E,D1             * compare if input is n
+        BEQ         STOP                * branch if equal
+        CMPI.B      #$4E,D1             * compare if input is N
+        BEQ         STOP                * branch if equal
+
+        BRA         BAD_RERRUN          * branch to BAD_RERRUN
+        
+* Run the program again ----------------------------------------------        
+RUN_AGAIN
+        JSR         CLEARALL            * jump to CLEALL
+        BRA         START               * branch to START
+                              
+* Clears all registers -----------------------------------------------       
+CLEARALL
+        CLR         D0
+        CLR         D1
+        CLR         D2
+        CLR         D3
+        CLR         D4
+        CLR         D5
+        CLR         D6
+        CLR         D7
+
+        RTS
+        
 * End the program ----------------------------------------------------
 STOP   
         MOVE.B      #9,D0               * move task #9
         TRAP        #15
-  
-  
+   
 * --------------------------------------------------------------------
 **********************************************************************
 * --------------------------------------------------------------------
-
-    
+   
 CR      EQU         $0D
 LF      EQU         $0A
 
@@ -1701,8 +1764,8 @@ TOOLARGEADDRESS DC.B    'Address input must be below 00FFFE00',CR,LF,0
 ENDBIGGERSTART  DC.B    'The end address must be bigger than the start address',CR,LF,0
 NOTEVEN         DC.B    'The address input has to be an even value...',CR,LF,0
 
-goodcode        DS.B    50
-
+RUNAGAIN        DC.B    'Do you want to run the program again? (y,n) ',0
+BAD_ANSWER      DC.B    CR,LF,'Invalid answer, please input y or n ',0
 
 BADINPUT DC.B       'Input is not valid try again...',CR,LF,0
 BADADDRESS DC.B     'Address input is not valid try again...',CR,LF,0
