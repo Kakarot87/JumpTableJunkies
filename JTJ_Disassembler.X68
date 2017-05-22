@@ -9,6 +9,7 @@ userinput   EQU     $00A0           * user input
 minAddress  EQU     $00000000       * min address
 maxAddress  EQU     $00FFFE00       * max address
 storage     EQU     $0000F000       * stores instructions
+compareEnd  EQU     $0000FFF0       * stores end address in good form          
 
 inputMin    EQU     $0A00
 inputMax    EQU     $0B00
@@ -117,9 +118,10 @@ CHECK_END_ADDRESS
         BGT         ADDRESS_LARGE   * branch to ADDRESS_LARGE if bigger
         CMP.L       D2,A6           * compare content of D6 and A6
         BGT         ADDRESS_MISMATCH * branch to ADDRESS_MISMATCH if bigger      
-        MOVE.L      D2,A5           * move content of D2 to A5
+         * MOVE.L      D2,A5           * move content of D2 to A5
+        LEA         compareEnd,A5   * load compareEnd into A5
+        MOVE.L      D2,(A5)         * move content of D2 into A5
         BRA         GOODADDRESS     * branch to GOODADDRESS
-
 
 ************** DIFFERENT ERRORS FOR ADDRESS **************************
 
@@ -343,9 +345,10 @@ STARTDECODE
         CLR         D1                  * clear D1
         CLR         D2                  * clear D2
         CLR         D3                  * clear D3
-        MOVE.L      D6,D3               * move content of D6 to D3
+        MOVE.L      A6,D3               * move content of D6 to D3
+        LEA         $0000F000,A2        * re-load address to start printing from
         JSR         CHECK_IF_DONE       * jump to CHECK_IF_DONE
-        JSR         PREPARE_PRINT       * jump to PREPARE PRINT
+        BRA         PREPARE_PRINT       * jump to PREPARE PRINT
         
 * Prints the current address or the address location of the op code --
 PREPARE_PRINT     
@@ -394,9 +397,14 @@ PREPARE_PRINT
 * Adds final touches to make nice syntax before printing ------------
 ****************************************************************************************************************************
 PRINT_READY
+        MOVE.B      #' ',(A2)+              * Just for syntax
+        MOVE.B      #' ',(A2)+
+        MOVE.B      #' ',(A2)+
+        MOVE.B      #' ',(A2)+
+        
+        BRA         MAIN  
+              
 MAIN:  
-            LEA         $0000F000,A2    *re-load address to start printing from
-            JSR         CHECK_IF_DONE
             MOVE.W      (A6)+,D6        ;MOVE NEXT OPCODE INTO D6...A6 starts as user entered the start address
             CMP.W       #$47E1,D6
             BEQ         _NOP
@@ -1133,7 +1141,7 @@ _MOVEQ
             
 NEXT_CODE ;set everything up for the next opcode
             CLR         D4
-            BRA         MAIN
+            BRA         STARTDECODE
 
 *------------------To isolate source mode------------------------
 EA_5_0  ;determine source number & mode and print
@@ -1587,14 +1595,15 @@ PRINT
         LEA         $0000F000,A1        * load address to start printing from
         MOVEQ       #13,D0              * load task 13 into D0
         TRAP        #15                  
-        BRA         MAIN                * branch to MAIN, start next decode
+        RTS                             * return to subroutine
               
 * Check current address to see if end address is reached -------------        
 CHECK_IF_DONE
-        CMP.L       A5,A6               *
-        BGE         FINISHED            *         
+        LEA         compareEnd,A5       * load compareEnd into A5
+        MOVE.L      (A5),D5             * move content of A5 into D5
+        CMP.L       D5,A6               * compare D5 and A6
+        BGE         FINISHED            * branch if greater or equal
         RTS                             * return to subroutine
-
 * The program has deconstructed from start address to end address ----
 FINISHED
         LEA         FINISHEDPRINT,A1    * load finished message
