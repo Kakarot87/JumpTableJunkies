@@ -1,0 +1,1649 @@
+*-----------------------------------------------------------
+* Title      :
+* Written by : Bogdan Boiko
+* Date       : 05-02-2017
+* Description:
+*---------------------------------------------------------------------
+
+userinput   EQU     $00A0           * user input
+minAddress  EQU     $00000000       * min address
+maxAddress  EQU     $00FFFE00       * max address
+storage     EQU     $0000F000       * stores instructions
+
+inputMin    EQU     $0A00
+inputMax    EQU     $0B00
+
+START:      ORG     $1000           * first instruction of program
+
+*---------------------------------------------------------------------
+        *LEA         SCREEN,A1       * display start screen
+        *MOVE.B      #14,D0          * move task #14 to D0
+        *TRAP        #15
+      
+        LEA         PROJECT,A1      * display project 
+        MOVE.B      #14,D0          * move task #14 to D0
+        TRAP        #15 
+     
+        LEA         INFO,A1         * display instructions
+        MOVE.B      #14,D0          * move task #14 to D0
+        TRAP        #15
+
+* User will input the starting address of deconstructor -------------
+STARTADDRESS
+        CLR         D7              * clear register D7
+        LEA         INPUTSTARTADD,A1 * load input message
+        MOVE.B      #14,D0              
+        TRAP        #15
+        
+        LEA         inputMin,A1     * load start address to be stored
+        MOVE.B      #2,D0           * move task #2 to D0
+        TRAP        #15 
+     
+        BRA         LOADCHAR        * branch to LOADCHAR
+
+* User will input the ending address of deconstructor -------------
+ENDADDRESS
+        CLR         D7              * clear register D7
+        LEA         INPUTENDADD,A1  * load end address input message
+        MOVE.B      #14,D0          * move task #14 to D0
+        TRAP        #15 
+     
+        LEA         inputMax,A1     * load end address to be stored
+        MOVE.B      #2,D0           * move task #2 to D0
+        TRAP        #15 
+      
+        BRA         LOADCHAR        * branch to LOADCHAR
+      
+* Loop throught bytes to check each hex char 1 at a time -------------
+LOADCHAR    
+        MOVE.B      (A1),D1         * move content of A1 into D1
+        ADDI.B      #1,D7           * start looping
+        CMPI.W      #10,D7          * stop if looped 9 times
+        BEQ         ADD_TOO_BIG     * branch to CHECKADD
+        BRA         ASCII_HEX       * branch to ASCII_HEX
+         
+* Input address is calculated ----------------------------------------
+ADD_DONE
+        CMPI.W      #1,D7           * error if looped 0 times
+        BEQ         NO_ADDRESS      * branch to NO_START_ADDRESS     
+        BRA         SIMPLIFY_ADDRESS * branch to SIMPLIFY_ADDRESS  
+
+* Address input is taken and put into data register ------------------
+SIMPLIFY_ADDRESS
+        CLR         D2              * clear D2
+        CLR         D3              * clear D3       
+        CMPI.B      #1,D6           * complare if D6 is 1
+        BEQ         SIMPLIFY_END_ADDRESS    * branch to SIMPLIFY_END_ADDRESS
+        MOVE.L      #inputMin,A1    * move inputMin into A1      
+        BRA         LOOPADDRESS     * branch to LOOPADDRESS
+
+* For the case of simplifiying the end address -----------------------
+SIMPLIFY_END_ADDRESS
+        MOVE.L      #inputMax,A1    * load inputMax into A1
+        BRA         LOOPADDRESS     * branch to LOOPADDRESS
+       
+* Loops address and simplifies it ------------------------------------       
+LOOPADDRESS
+        MOVE.B      (A1)+,D1        * move byte from A1 to D1 and postincriment
+        ADDI.B      #1,D3           * add 1 to D3
+        CMP.B       D3,D7           * compare if D3 is equal to D7
+        BEQ         CHECKIFEVEN     * brach if equal
+        ASL.L       #4,D2           * shift content of D2 4 bits left
+        ADD.B       D1,D2           * add a byte from D1 to D2
+        BRA         LOOPADDRESS     * branch to LOOPADDRESS
+              
+* Checks if the user input address is even -------------------------
+CHECKIFEVEN 
+        MOVE.L      D2,D3           * copy D2 to D3
+        ASR         #1,D3           * shift content of D3 1 bit right
+        BCS         NOTEVENERROR    * branch to NOTEVENERROR if bit is set    
+        CMPI.B      #1,D6           * compare if D6 is 1
+        BEQ         CHECK_END_ADDRESS   * brach to CHECK_END_ADDRESS if equal
+        BRA         CHECK_START_ADDRESS * branch to CHEKC_START_ADDRESS
+              
+* Check to make sure that the start address is even ------------------        
+CHECK_START_ADDRESS
+        CMP.L       #minAddress,D2  * compare minAddress and D2
+        BLT         ADDRESS_SMALL   * branch to ADDRESS_SMALL if smaller
+        CMP.L       #maxAddress,D2  * compare maxAddress and D2
+        BGT         ADDRESS_LARGE   * branch to ADDRESS_LARGE if bigger   
+        ADDI.B      #1,D6           * add 1 to D6
+        MOVE.L      D2,A6           * move content of D2 into A6
+        BRA         ENDADDRESS      * branch to ENDADDRESS
+           
+* Check to make sure that the end address is even ------------------  
+CHECK_END_ADDRESS
+        CMP.L       #maxAddress,D2  * compare maxAddress and D2 
+        BGT         ADDRESS_LARGE   * branch to ADDRESS_LARGE if bigger
+        CMP.L       D2,A6           * compare content of D6 and A6
+        BGT         ADDRESS_MISMATCH * branch to ADDRESS_MISMATCH if bigger      
+        MOVE.L      D2,A5           * move content of D2 to A5
+        BRA         GOODADDRESS     * branch to GOODADDRESS
+
+
+************** DIFFERENT ERRORS FOR ADDRESS **************************
+
+* Invalid input branch -----------------------------------------------
+INVALID
+        LEA         BADADDRESS,A1       * load BADINPUT message
+        MOVE.B      #14,D0              * move task #14 to D0
+        TRAP        #15                 * display BADINPUT messgae
+        CLR.W       D7                  * clear counter data register
+        
+        CMPI.W      #1,D6               * compare if D6 is equal to 1
+        BEQ         ENDADDRESS          * branch to ENDADDRESS
+        BRA         STARTADDRESS        * branch to STATADDRESS
+      
+
+* The address user has entered is over 8 characters so ---------------
+ADD_TOO_BIG
+        LEA         INPUTTOOLARGE,A1    * load INPUTTOOLARGE message
+        MOVE.B      #14,D0              * move task #14 to D0
+        TRAP        #15
+        
+        CMPI.W      #1,D6               * compare if D6 is equal to 1
+        BEQ         ENDADDRESS          * branch to ENDADDRESS
+        BRA         STARTADDRESS        * branch to STATADDRESS
+        
+* Displays an error if the address input is not even ---------------
+NOTEVENERROR
+        LEA         NOTEVEN,A1          * load NOTEVEN message
+        MOVE.B      #14,D0              * move task #14 to D0
+        TRAP        #15
+        
+        CMPI.W      #1,D6               * compare if D6 is equal to 1
+        BEQ         ENDADDRESS          * branch to ENDADDRESS
+        BRA         STARTADDRESS        * branch to STATADDRESS
+
+* Check if end address is large than start address ----------------
+ADDRESS_MISMATCH
+        LEA         ENDBIGGERSTART,A1   * load ENDBIGGERSTART
+        MOVE.B      #14,D0              * move task #14 to D0
+        TRAP        #15
+        
+        BRA         ENDADDRESS          * branch to ENDADDRESS
+
+* Checks if address is smaller than the minimum value -------------
+ADDRESS_SMALL
+        LEA         TOOSMALLADDRESS,A1  * load TOOSMALLADDRESS message
+        MOVE.B      #14,D0              * move task #14 to D0
+        TRAP        #15
+        
+        CMPI.W      #1,D6               * compare if D6 is equal to 1
+        BEQ         ENDADDRESS          * branch to ENDADDRESS
+        BRA         STARTADDRESS        * branch to STATADDRESS
+        
+* Checks if address is large than the maximum value ---------------
+ADDRESS_LARGE
+        LEA         TOOLARGEADDRESS,A1  * load TOOLARGEADDRESS message
+        MOVE.B      #14,D0              * move task #14 to D0
+        TRAP        #15
+
+        CMPI.W      #1,D6               * compare if D6 is equal to 1
+        BEQ         ENDADDRESS          * branch to ENDADDRESS
+        BRA         STARTADDRESS        * branch to STATADDRESS
+
+* User did not input a starting address ------------------------------
+NO_ADDRESS
+        LEA         NOADDRESS_ERR,A1    * load NOADDRESS_ERR message
+        MOVE.B      #14,D0              * move task #14 to D0
+        TRAP        #15
+        
+        BRA         STARTADDRESS        * branch to STARTADDRESS
+ 
+
+                * ASCII to Hex and Hex to ASCII converters    
+*//////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+**************************************************************************
+*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////
+
+* Used to find ASCII characters to be converted to hex ---------------      
+ASCII_HEX
+        CMPI.B      #$0,D1          * if end of address
+        BEQ         ADD_DONE        * branch to ADD_DONE
+        
+        CMPI.B      #$30,D1         * compare to ascii 0
+        BLT         INVALID         * branch to INVALID if less
+        CMPI.B      #$66,D1         * compare to ascii f
+        BGT         INVALID         * branch to INVALID if more
+        CMPI.B      #$39,D1         * compare to ascii 9
+        BLE         NUMBER          * branch to NUMBER if less or equal
+        CMPI.B      #$61,D1         * compare to ascii a
+        BGE         LOWLETTER       * branch to LOWLETTER if greater or equal
+        CMPI.B      #$46,D1         * compare to ascii F
+        BGT         INVALID         * branch to INVALID if more 
+        CMPI.B      #$41,D1         * compare to ascii A
+        BGE         CAPLETTER       * branch to CAPLETTER if greater or equal
+        
+        BRA         INVALID         * branch to INVALID
+ 
+* Convert ASCII to hex for numbers 0 - 9 -----------------------------
+NUMBER
+        SUBI.B      #$30,D1             * subtract ascii to get hex
+        MOVE.B      D1,(A1)+            * move hex value into storage instead of ascii       
+        
+        BRA         LOADCHAR            * branch to check next character
+
+* Convert ASCII to hex for letters A - F -----------------------------
+CAPLETTER
+        SUBI.B      #55,D1              * subtract ascii to get hex
+        MOVE.B      D1,(A1)+            * move hex value into storage instead of ascii
+        
+        BRA         LOADCHAR            * branch to LOADCHAR
+
+* Convert ASCII to hex for letters a - f -----------------------------
+LOWLETTER 
+        SUBI.B      #87,D1              * subtract ascii to get hex
+        MOVE.B      D1,(A1)+            * move hex value into storage instead of ascii
+        
+        BRA         LOADCHAR            * branch to LOADCHAR
+
+* Adds 0 into the address that will be printer and postincrements
+ADD_ASCII_0
+        MOVE.B      #'0',(A2)+          * move 0 into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds 1 into the address that will be printer and postincrements
+ADD_ASCII_1
+        MOVE.B      #'1',(A2)+          * move 1 into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds 2 into the address that will be printer and postincrements
+ADD_ASCII_2
+        MOVE.B      #'2',(A2)+          * move 2 into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds 3 into the address that will be printer and postincrements
+ADD_ASCII_3
+        MOVE.B      #'3',(A2)+          * move 3 into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds 4 into the address that will be printer and postincrements
+ADD_ASCII_4
+        MOVE.B      #'4',(A2)+          * move 4 into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds 5 into the address that will be printer and postincrements
+ADD_ASCII_5
+        MOVE.B      #'5',(A2)+          * move 5 into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds 6 into the address that will be printer and postincrements
+ADD_ASCII_6
+        MOVE.B      #'6',(A2)+          * move 6 into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds 7 into the address that will be printer and postincrements
+ADD_ASCII_7
+        MOVE.B      #'7',(A2)+          * move 7 into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds 8 into the address that will be printer and postincrements        
+ADD_ASCII_8
+        MOVE.B      #'8',(A2)+          * move 8 into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds 9 into the address that will be printer and postincrements
+ADD_ASCII_9
+        MOVE.B      #'9',(A2)+          * move 9 into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds A into the address that will be printer and postincrements
+ADD_ASCII_A
+        MOVE.B      #'A',(A2)+          * move A into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds B into the address that will be printer and postincrements
+ADD_ASCII_B
+        MOVE.B      #'B',(A2)+          * move B into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds C into the address that will be printer and postincrements
+ADD_ASCII_C
+        MOVE.B      #'C',(A2)+          * move C into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+ 
+* Adds D into the address that will be printer and postincrements       
+ADD_ASCII_D
+        MOVE.B      #'D',(A2)+          * move D into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds E into the address that will be printer and postincrements
+ADD_ASCII_E
+        MOVE.B      #'E',(A2)+          * move E into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+        
+* Adds F into the address that will be printer and postincrements
+ADD_ASCII_F         
+        MOVE.B      #'F',(A2)+          * move F into address A2
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT   
+        
+*//////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+**************************************************************************
+*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////
+
+* User input address is correct --------------------------------------
+GOODADDRESS 
+
+        MOVE.L      A6,$00FFFE10        * stores user input start address
+        MOVE.L      A5,$00FFFE20        * stores user input end addres
+        
+        CLR         D6                  * clear data register D6
+        MOVE.L      A5,D6               * move end address to D6          
+        SUB.L       A6,D6               * subtract start address from end address
+        MOVE.L      D6,$00FFFE30        * stores number of instructions
+        
+        MOVE.L      A6,D6
+        
+        LEA         storage,A2          * loads storage 
+        BRA         STARTDECODE         * branch to STARTDECODE
+
+* Starts the actuall process of doing the deconstruction of code -----       
+STARTDECODE
+        CLR         D1                  * clear D1
+        CLR         D2                  * clear D2
+        CLR         D3                  * clear D3
+        MOVE.L      D6,D3               * move content of D6 to D3
+        JSR         CHECK_IF_DONE       * jump to CHECK_IF_DONE
+        JSR         PREPARE_PRINT       * jump to PREPARE PRINT
+        
+* Prints the current address or the address location of the op code --
+PREPARE_PRINT     
+        ADDI.W      #1,D2               * add 1 to D2
+        CMPI.B      #9,D2               * compare if D2 is 9
+        BEQ         PRINT_READY         * if equal, branch to PRINT_READY
+        ROL.L       #4,D3               * rotate content of D3 4 bits
+        MOVE.B      D3,D1               * copy D3 to D1
+        LSL.B       #4,D1               * shift content of D1 4 bits left
+        LSR.B       #4,D1               * shift content of D1 4 bits right
+        CMPI.B      #0,D1               * compare if D1 is 0
+        BEQ         ADD_ASCII_0         * branch if equal
+        CMPI.B      #1,D1               * compare if D1 is 1
+        BEQ         ADD_ASCII_1         * branch if equal
+        CMPI.B      #2,D1               * compare if D1 is 2
+        BEQ         ADD_ASCII_2         * branch if equal
+        CMPI.B      #3,D1               * compare if D1 is 3
+        BEQ         ADD_ASCII_3         * branch if equal
+        CMPI.B      #4,D1               * compare if D1 is 4
+        BEQ         ADD_ASCII_4         * branch if equal
+        CMPI.B      #5,D1               * compare if D1 is 5
+        BEQ         ADD_ASCII_5         * branch if equal
+        CMPI.B      #6,D1               * compare if D1 is 6
+        BEQ         ADD_ASCII_6         * branch if equal
+        CMPI.B      #7,D1               * compare if D1 is 7
+        BEQ         ADD_ASCII_7         * branch if equal
+        CMPI.B      #8,D1               * compare if D1 is 8
+        BEQ         ADD_ASCII_8         * branch if equal
+        CMPI.B      #9,D1               * compare if D1 is 9
+        BEQ         ADD_ASCII_9         * branch if equal
+        CMPI.B      #$A,D1              * compare if D1 is A
+        BEQ         ADD_ASCII_A         * branch if equal
+        CMPI.B      #$B,D1              * compare if D1 is B
+        BEQ         ADD_ASCII_B         * branch if equal
+        CMPI.B      #$C,D1              * compare if D1 is C
+        BEQ         ADD_ASCII_C         * branch if equal
+        CMPI.B      #$D,D1              * compare if D1 is D
+        BEQ         ADD_ASCII_D         * branch if equal
+        CMPI.B      #$E,D1              * compare if D1 is E
+        BEQ         ADD_ASCII_E         * branch if equal
+        CMPI.B      #$F,D1              * compare if D1 is F
+        BEQ         ADD_ASCII_F         * branch if equal
+                     
+        BRA         PREPARE_PRINT       * branch to PREPARE_PRINT
+
+* Adds final touches to make nice syntax before printing ------------
+****************************************************************************************************************************
+PRINT_READY
+MAIN:  
+            LEA         $0000F000,A2    *re-load address to start printing from
+            JSR         CHECK_IF_DONE
+            MOVE.W      (A6)+,D6        ;MOVE NEXT OPCODE INTO D6...A6 starts as user entered the start address
+            CMP.W       #$47E1,D6
+            BEQ         _NOP
+            CMP.W       #$4E75,D6
+            BEQ         _RTS
+            MOVE.W      D6,D5           ;MOVE WORD INTO D5 TO GET WORKED ON
+            LSR.W       #8,D5           ;Shift and mask bits
+            LSR.W       #4,D5               
+            LSL.W       #8,D5
+            LSL.W       #4,D5
+            CMP.W       #$1000,D5
+            BEQ         _MOVEB
+            CMP.W       #$3000,D5
+            BEQ         _MOVEW
+            CMP.W       #$2000,D5
+            BEQ         _MOVEL
+            
+            MOVE.W      D6,D5
+            LSR.W       #8,D5
+            LSL.W       #8,D5
+            
+            CMP.W       #$6000,D5
+            BEQ         _BRA
+            CMP.W       #$6100,D5
+            BEQ         _BSR
+            CMP.W       #$6200,D5
+            BEQ         _BHI
+            CMP.W       #$6300,D5
+            BEQ         _BLS
+            CMP.W       #$6400,D5
+            BEQ         _BCC
+            CMP.W       #$6500,D5
+            BEQ         _BCS
+            CMP.W       #$6600,D5
+            BEQ         _BNE
+            CMP.W       #$6700,D5
+            BEQ         _BEQ
+            CMP.W       #$6800,D5
+            BEQ         _BVC
+            CMP.W       #$6900,D5
+            BEQ         _BVS
+            CMP.W       #$6A00,D5
+            BEQ         _BPL
+            CMP.W       #$6B00,D5
+            BEQ         _BMI
+            CMP.W       #$6C00,D5
+            BEQ         _BGE
+            CMP.W       #$6D00,D5
+            BEQ         _BLT
+            CMP.W       #$6E00,D5
+            BEQ         _BGT
+            CMP.W       #$6F00,D5
+            BEQ         _BLE
+            
+            MOVE.W      D6,D5
+            LSR.W       #6,D5
+            LSL.W       #6,D5
+            
+            CMP.W       #$4E80,D5
+            BEQ         _JSR
+            CMP.W       #$E3C0,D5
+            BEQ         _LSL
+            CMP.W       #$E2C0,D5
+            BEQ         _LSR
+            CMP.W       #$E0C0,D5
+            BEQ         _ASR
+            CMP.W       #$E1C0,D5
+            BEQ         _ASL
+            CMP.W       #$E7C0,D5
+            BEQ         _ROL
+            CMP.W       #$E6C0,D5
+            BEQ         _ROR
+            CMP.W       #$4200,D5
+            BEQ         _CLRB
+            CMP.W       #$4240,D5
+            BEQ         _CLRW
+            CMP.W       #$4280,D5
+            BEQ         _CLRL
+            CMP.W       #$0600,D5
+            BEQ         _ADDIB
+            CMP.W       #$0640,D5
+            BEQ         _ADDIW
+            CMP.W       #$0680,D5
+            BEQ         _ADDIL
+            
+            MOVE.W      D6,D5
+            LSR.W       #6,D5
+            LSL.W       #6,D5
+            BCLR.L      #$09,D5
+            BCLR.L      #$0A,D5
+            BCLR.L      #$0B,D5
+            
+            CMP.W       #$1040,D5
+            BEQ         _MOVEAB
+            CMP.W       #$3040,D5
+            BEQ         _MOVEAW
+            CMP.W       #$2040,D5
+            BEQ         _MOVEAL
+            CMP.W       #$D0C0,D5
+            BEQ         _ADDAW
+            CMP.W       #$D1C0,D5
+            BEQ         _ADDAL
+            CMP.W       #$5000,D5
+            BEQ         _ADDQB
+            CMP.W       #$5040,D5
+            BEQ         _ADDQW
+            CMP.W       #$5080,D5
+            BEQ         _ADDQL
+            CMP.W       #$C1C0,D5
+            BEQ         _MULS
+            CMP.W       #$80C0,D5
+            BEQ         _DIVU
+            CMP.W       #$41C0,D5
+            BEQ         _LEA
+            CMP.W       #$B000,D5
+            BEQ         _CMPB
+            CMP.W       #$B040,D5
+            BEQ         _CMPW
+            CMP.W       #$B080,D5
+            BEQ         _CMPL
+
+            BCLR.L      #$08,D5
+
+            CMP.W       #$C000,D5
+            BEQ         _ANDB
+            CMP.W       #$C040,D5
+            BEQ         _ANDW
+            CMP.W       #$C080,D5
+            BEQ         _ANDL
+            CMP.W       #$8000,D5
+            BEQ         _ORB
+            CMP.W       #$8040,D5
+            BEQ         _ORW
+            CMP.W       #$8080,D5
+            BEQ         _ORL
+            CMP.W       #$9000,D5
+            BEQ         _SUBB
+            CMP.W       #$9040,D5
+            BEQ         _SUBW
+            CMP.W       #$9080,D5
+            BEQ         _SUBL
+            CMP.W       #$D000,D5
+            BEQ         _ADDB
+            CMP.W       #$D040,D5
+            BEQ         _ADDW
+            CMP.W       #$D080,D5
+            BEQ         _ADDL
+            
+            MOVE.W      D6,D5
+            LSR.W       #6,D5
+            LSL.W       #6,D5
+            BCLR.L      #$0A,D5
+            
+            CMP.W       #$4880,D5
+            BEQ         _MOVEMW
+            CMP.W       #$48C0,D5
+            BEQ         _MOVEML
+            CMP.W       #$7000,D5
+            BEQ         _MOVEQ
+            
+_DATA
+            MOVE.B      #'D',(A2)+      ;Couldn't decode, print DATA
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'T',(A2)+
+            MOVE.B      #'A',(A2)+ 
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+           
+_NOP
+            MOVE.B      #'N',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'P',(A2)+
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_RTS
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'T',(A2)+
+            MOVE.B      #'S',(A2)+
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_MOVEB
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'B',(A2)+
+            JSR         EA_5_0          ;determine source addressing mode & number and print
+            JSR         EA_11_6         ;determine destination addressing mode & number and print  
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_MOVEW
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'W',(A2)+
+            JSR         EA_5_0          ;determine source addressing mode & number and print
+            JSR         EA_11_6         ;determine destination addressing mode & number and print     
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_MOVEL
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         EA_5_0          ;determine source addressing mode & number and print
+            JSR         EA_11_6         ;determine destination addressing mode & number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BRA
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'A',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BSR
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'S',(A2)+
+            MOVE.B      #'R',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BHI
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'H',(A2)+
+            MOVE.B      #'I',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BLS
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'L',(A2)+
+            MOVE.B      #'S',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BCC
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'C',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BCS
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'S',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BNE
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'N',(A2)+
+            MOVE.B      #'E',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BEQ
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'Q',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BVC
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #'C',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BVS
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #'S',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BPL
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'P',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BMI
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'I',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BGE
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'G',(A2)+
+            MOVE.B      #'E',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BLT
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'L',(A2)+
+            MOVE.B      #'T',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BGT
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'G',(A2)+
+            MOVE.B      #'T',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_BLE
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'L',(A2)+
+            MOVE.B      #'E',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_JSR
+            MOVE.B      #'J',(A2)+
+            MOVE.B      #'S',(A2)+
+            MOVE.B      #'R',(A2)+
+            JSR         DISPLACEMENT    ;determine  the displacement and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+*****************************************************************************************
+_LSL
+            MOVE.B      #'L',(A2)+
+            MOVE.B      #'S',(A2)+
+            MOVE.B      #'L',(A2)+   
+
+_LSR
+_ASR
+_ASL
+_ROL
+_ROR
+*****************************************************************************************
+_CLRB
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'L',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'B',(A2)+
+            JSR         EA_5_0          ;determine source addressing mode & number and print    
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_CLRW
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'L',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'W',(A2)+
+            JSR         EA_5_0          ;determine source addressing mode & number and print    
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_CLRL
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'L',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         EA_5_0          ;determine source addressing mode & number and print    
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ADDIB
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'I',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'B',(A2)+
+            JSR         EA_5_0          ;determine source addressing mode & number and print    
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ADDIW
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'I',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'W',(A2)+
+            JSR         EA_5_0          ;determine source addressing mode & number and print    
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ADDIL
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'I',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         EA_5_0          ;determine source addressing mode & number and print    
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_MOVEAB
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'B',(A2)+
+            JSR         EA_5_0          ;determine source addressing mode & number and print
+            JSR         EA_11_6         ;determine destination addressing mode & number and print  
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_MOVEAW
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'W',(A2)+
+            JSR         EA_5_0          ;determine source addressing mode & number and print
+            JSR         EA_11_6         ;determine destination addressing mode & number and print  
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_MOVEAL
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         EA_5_0          ;determine source addressing mode & number and print
+            JSR         EA_11_6         ;determine destination addressing mode & number and print  
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ADDAW
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'W',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_6         ;determine destination addressing mode & number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ADDAL
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_6         ;determine destination addressing mode & number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ADDQB
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'Q',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'B',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_6         ;determine destination addressing mode & number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ADDQW
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'Q',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'W',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_6         ;determine destination addressing mode & number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ADDQL
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'Q',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_6         ;determine destination addressing mode & number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_MULS
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'U',(A2)+
+            MOVE.B      #'L',(A2)+
+            MOVE.B      #'S',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_DIVU
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'I',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #'U',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_LEA
+            MOVE.B      #'L',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'A',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_CMPB
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'P',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'B',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_CMPW
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'P',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'W',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_CMPL
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'P',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ANDB
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'N',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'B',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ANDW
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'N',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'W',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ANDL
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'N',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ORB
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'B',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ORW
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'W',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ORL
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_SUBB
+            MOVE.B      #'S',(A2)+
+            MOVE.B      #'U',(A2)+
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'B',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_SUBW
+            MOVE.B      #'S',(A2)+
+            MOVE.B      #'U',(A2)+
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'W',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_SUBL
+            MOVE.B      #'S',(A2)+
+            MOVE.B      #'U',(A2)+
+            MOVE.B      #'B',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ADDB
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'B',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ADDW
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'W',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ADDL
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_MOVEMW
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'W',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_MOVEML
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_MOVEQ
+            MOVE.B      #'M',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'Q',(A2)+
+            JSR         EA_DATA         ;determine addressing mode & source and print
+            JSR         EA_11_9         ;determine destination number and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR     
+            
+NEXT_CODE ;set everything up for the next opcode
+            BRA         MAIN
+
+*------------------To isolate source mode------------------------
+EA_5_0  ;determine source number & mode and print
+            JSR     BIT3_5           *Store source mode bits into D5
+            LEA     ADDRESSTABLE, A5 *Load jump-table
+            MULU    #8,D5
+            JSR (A5,D5)           
+            RTS 
+*------------------BIT3_5---------------------------------------      
+BIT3_5
+            MOVE.W  D6,D5    *Move to D5 to figure out source mode    
+            LSL.W   #8,D5
+            LSL.W   #2,D5       
+            LSR.W   #6,D5
+            LSR.W   #7,D5    *After this line, D5 contains Source mode
+            RTS
+*------------------BIT0_2---------------------------------------------
+BIT0_2
+            MOVE.W  D6,D5       
+            LSL.W   #8,D5    *Shift all bits except last 3 out 
+            LSL.W   #5,D5                   
+            LSR.W   #8,D5
+            LSR.W   #5,D5
+            RTS       
+EA_11_6 ;determine destination number & mode and print
+EA_11_9 ;determine destination number and print
+            JSR BIT9_11
+            LEA Table0_7_8_F,A5
+            MULU    #8,D5
+            JSR     (A5,D5)
+            RTS   
+
+BIT6_8  *Destination Mode
+            MOVE.W D6,D5  *Isolate bits 6-8
+            LSL.W #7,D5
+            LSR.W #8,D5
+            LSR.W #5,D5
+            RTS
+BIT9_11 *Destination Register
+            MOVE.W D6,D5   *Isolate bits 9-11
+            LSL.W #4,D5
+            LSR.W #8,D5
+            LSR.W #5,D5
+            RTS
+*---------Subroutine for figuring out Move destination---------------------
+MOVEDEST *To figure out destination of MOVE
+            MOVE.B ',',(A2)+  *Comma between source/dest
+            JSR BIT6_8        *Figure out destination mode
+            CMP.W #%000, D5   *Check if data register
+            BEQ MOVEDEST000
+            CMP.W #%001, D5   *Check if address register
+            BEQ MOVEDEST001   
+            CMP.W #%010,D5    *Check if indirect
+            BEQ MOVEDEST010   
+            CMP.W  #%011,D5   *Check if adress post-inc
+            BEQ   MOVEDEST011 
+            CMP.W  #%100,D5   *Check if address pre-dec
+            BEQ   MOVEDEST100 
+            CMP.W  #%111,D5   *Check if immediate/absolute
+            BEQ   MOVEDEST111
+            RTS
+MOVEDEST000 *Move destination is a data register
+            MOVE.B #'D',(A2)+
+            JSR BIT9_11
+            Lea    Table0_7_8_F,A5
+            MULU   #8,D5
+            JSR    (A5,D5)
+            RTS
+            
+MOVEDEST001 *Move destination is an address register
+            MOVE.B #'A',(A2)+
+            JSR BIT9_11
+            Lea    Table0_7_8_F,A5
+            MULU   #8,D5
+            JSR    (A5,D5)
+            RTS
+
+MOVEDEST010 *Move destinataion is indirect
+            MOVE.B  #'(',(A2)+  
+            MOVE.B  #'A',(A2)+ 
+            JSR BIT9_11
+            Lea    Table0_7_8_F,A5
+            MULU   #8,D5
+            JSR    (A5,D5)
+            MOVE.B #')',(A2)+
+            RTS
+            
+MOVEDEST011 *Move destination is adress post-inc
+            MOVE.B  #'(',(A2)+  
+            MOVE.B  #'A',(A2)+ 
+            JSR BIT9_11
+            Lea    Table0_7_8_F,A5
+            MULU   #8,D5
+            JSR    (A5,D5)
+            MOVE.B #')',(A2)+
+            MOVE.B #'+',(A2)+
+            RTS
+
+MOVEDEST100 *Move destination is address pre-dec
+            MOVE.B #'-',(A2)+
+            MOVE.B  #'(',(A2)+  
+            MOVE.B  #'A',(A2)+ 
+            JSR BIT9_11
+            Lea    Table0_7_8_F,A5
+            MULU   #8,D5
+            JSR    (A5,D5)
+            MOVE.B #')',(A2)+
+            RTS
+MOVEDEST111 *Move destination is absolute
+            MOVE.B D6,D5
+            LSL.B #3,D5
+            LSL.B #2,D5
+            LSR.B #2,D5
+            LSR.B #3,D5
+            CMP.B #%100,D5
+            BEQ MVDSTLNG
+            CMP.B #0,D5
+            BEQ MVDSTWRD  
+            RTS    
+MVDSTLNG
+            MOVE.B #'$',(A2)+
+            JSR IMEDWORD 
+            JSR IMEDWORD 
+            RTS
+MVDSTWRD      
+            MOVE.B #'$',(A2)+
+            JSR IMEDWORD 
+            RTS
+*--------------------------------------------------------------------------------------
+DISPLACEMENT ;special case for BRA instructions
+            CLR D5
+            MOVE.B D6,D5
+            CMP.B #$FF,D5
+            BEQ LONGDISP
+            CMP.B #0,D5
+            BEQ WORDISP
+            RTS
+LONGDISP
+WORDISP
+            CLR D5
+            MOVE.B #4,D4 *Word
+            MOVE.W (A3)+,D5 *Assuming A3 has current instruction
+            
+            
+EA_DATA ;special case for MOVEQ instruction to determine data
+
+*--------------------------------------------------------------------------------------
+DESTDATAREG *For instructions with data-register only destinations (DIVU,MULU)
+            MOVE.B 'D',(A2)+
+            JSR BIT9_11
+            LEA Table0_7_8_F,A5
+            MULU    #8,D5
+            JSR     (A5,D5)
+            RTS   
+DESTADDREG *For instructions with address-only destinations (MOVEA)
+            MOVE.B 'A',(A2)+
+            JSR BIT9_11
+            LEA Table0_7_8_F,A5
+            MULU    #8,D5
+            JSR     (A5,D5)
+            RTS   
+
+            
+*------------------------Addressing Mode Jump Table-------------------------------------
+ADDRESSTABLE JSR     dataReg    *data register
+             RTS             
+             JSR     addressReg *address register
+             RTS             
+             JSR     address    *address indirect
+             RTS             
+             JSR     addPostInc *address post increment
+             RTS             
+             JSR     addPreDec  *address pre decrement
+             RTS             
+             JSR     num5       *If number is somehow 5
+             RTS             
+             JSR     num6       *If number is somehow 6
+             RTS             
+             JSR     Immediate  *Immediate/Absolute addressing
+             RTS  
+*------------------------num5 num 6 were undefined geoff-------------------------------------
+num5         MOVE.B 'W',(A2)+
+             MOVE.B 'H',(A2)+
+             MOVE.B 'A',(A2)+
+             MOVE.B 'T',(A2)+
+             MOVE.B '`',(A2)+
+             MOVE.B 'S',(A2)+
+             MOVE.B 'T',(A2)+
+             MOVE.B 'H',(A2)+
+             MOVE.B 'I',(A2)+
+             MOVE.B 'S',(A2)+
+             MOVE.B '?',(A2)+
+             RTS     
+             
+num6         MOVE.B 'W',(A2)+
+             MOVE.B 'H',(A2)+
+             MOVE.B 'A',(A2)+
+             MOVE.B 'T',(A2)+
+             MOVE.B '`',(A2)+
+             MOVE.B 'S',(A2)+
+             MOVE.B 'T',(A2)+
+             MOVE.B 'H',(A2)+
+             MOVE.B 'I',(A2)+
+             MOVE.B 'S',(A2)+
+             MOVE.B '?',(A2)+
+             RTS     
+             
+             
+*----------------------Source is a data register----------------------------------------          
+dataReg 
+            MOVE.B  #'D',(A2)+
+            JSR     BIT0_2       
+            
+       *-------Figure out number of register---------*
+            Lea     Table0_7_8_F,A5
+            MULU    #8,D5
+            JSR     (A5,D5)
+            RTS
+*----------------------Source is an address register------------------------------------ 
+addressReg
+            MOVE.B  #'A',(A2)+
+            JSR     BIT0_2       
+            
+       *-------Figure out number of register---------*
+            Lea     Table0_7_8_F,A5
+            MULU    #8,D5
+            JSR     (A5,D5)
+            RTS
+*----------------------Source is Indirect----------------------------------------------      
+address *Indirect
+            MOVE.B #'(',(A2)+
+            MOVE.B #'A',(A2)+
+            JSR     BIT0_2 *Isolate bits 0-2
+            Lea     Table0_7_8_F,A5
+            MULU    #8,D5
+            JSR     (A5,D5)
+            MOVE.B  #')',(A2)+
+            RTS
+
+            
+*----------------------Source is address post-inc---------------------------------------      
+addPostInc  
+            MOVE.B  #'(',(A2)+
+            MOVE.B  #'A',(A2)+
+            JSR     BIT0_2 *Isolate bits 0-2
+            Lea     Table0_7_8_F,A5
+            MULU    #8,D5
+            JSR     (A5,D5)
+            MOVE.B  #')',(A2)+
+            MOVE.B  #'+',(A2)+
+            RTS
+*----------------------Source is address pre-dec----------------------------------------      
+addPreDec  
+            MOVE.B  #'-',(A2)+
+            MOVE.B  #'(',(A2)+
+            MOVE.B  #'A',(A2)+
+            JSR     BIT0_2 *Isolate bits 0-2
+            Lea     Table0_7_8_F,A5
+            MULU    #8,D5
+            JSR     (A5,D5)
+            MOVE.B #')',(A2)+
+            RTS
+*----------------------Source is immediate or absolute data------------------------------    
+Data
+            MOVE.B D6,D5
+            LSL.B #2,D5
+            LSL.B #3,D5
+            LSR.B #2,D5
+            LSR.B #3,D5
+            CMPI.B #%001,D5   *Checking if absolute long
+            BEQ    ABSLONG
+            CMPI.B #%000,D5   *Checking if absolute word
+            BEQ    ABSWORD
+            CMPI.B #%100,D5   *Checking for immediate data
+            BEQ    IMMEDIATE
+            RTS
+*----------------------Immediate data---------------------------------------------------                       
+IMMEDIATE   
+            MOVE.B #'#',(A2)+
+            MOVE.B #'$',(A2)+
+            CMP.B #2, D4     
+            BEQ   IMEDBYTE   *Check if byte data
+            CMP.B #4, D4     
+            BEQ   IMEDWORD   *Check if word data
+            CMP.B #8, D4     
+            BEQ   IMEDLONG   *Check if long data
+            RTS
+*---------------------------------Immediate Byte----------------------------------------
+IMEDBYTE  
+            MOVE.W (A3)+,D3  *Assuming (A3)  holds current instruction
+            MOVE.W D3,D2
+            LSL.W #5, D2
+            LSL.W #3, D2
+            LSR.W #3, D2
+            LSR.W #6, D2
+            LSR.W #3, D2
+            LEA Table0_7_8_F,A5
+            MULU.W #8,D2
+            JSR (A5,D2)      *Convert current value from memory to hex
+            MOVE.W D3,D2
+            LSL.W #6, D2
+            LSL.W #6, D2
+            LSR.W #6, D2
+            LSR.W #6, D2
+            LEA Table0_7_8_F,A5
+            MULU.W #8,D2
+            JSR (A5,D2)      *Convert current value from memory to hex
+            RTS
+            
+*---------------------------------Immediate Word-----------------------------------------           
+IMEDWORD  *Converts 4 characters to hex
+            MOVE.W (A3)+,D3  *Assuming (A3)  holds current instruction
+            MOVE.W D3,D2
+            LSR.W #6,D2
+            LSR.W #6,D2
+            LEA Table0_7_8_F,A5
+            MULU.W #8,D2
+            JSR (A5,D2)      *Convert current value from memory to hex
+            MOVE.W D3,D2
+            LSL.W #4,D2
+            LSR.W #6,D2
+            LSR.W #6,D2
+            LEA Table0_7_8_F,A5
+            MULU.W #8,D2
+            JSR (A5,D2)      *Convert current value from memory to hex
+            MOVE.W D3,D2
+            LSL.W #8,D2
+            LSR.W #6,D2
+            LSR.W #6,D2
+            LEA Table0_7_8_F,A5
+            MULU.W #8,D2
+            JSR (A5,D2)      *Convert current value from memory to hex
+            MOVE.W D3,D2
+            LSL.W #7,D2
+            LSL.W #5,D2
+            LSR.W #6,D2
+            LSR.W #6,D2
+            LEA Table0_7_8_F,A5
+            MULU.W #8,D2
+            JSR (A5,D2)      *Convert current value from memory to hex
+            RTS   
+*---------------------------------Immediate Long----------------------------------------       
+IMEDLONG
+            JSR IMEDWORD *First 4 characters
+            JSR IMEDWORD *Last 4 characters
+            RTS
+*---------------------------------Absolute Long----------------------------------------    
+ABSLONG
+            MOVE.B #'$',(A2)+
+            JSR IMEDWORD *First 4 characters
+            JSR IMEDWORD *Last 4 characters
+            RTS
+*---------------------------------Absolute Word----------------------------------------    
+ABSWORD     
+            MOVE.B #'$',(A2)+
+            JSR IMEDWORD  *Convert 4 characters to hex
+            RTS 
+                            
+*-----------------------Hex/Register numbers0-----------------------------------------
+Table0_7_8_F JSR     Reg0   *register 0
+             RTS           
+             JSR     Reg1   *register 1
+             RTS             
+             JSR     Reg2   *register 2
+             RTS           
+             JSR     Reg3   *register 3
+             RTS            
+             JSR     Reg4   *register 4
+             RTS           
+             JSR     Reg5   *register 5
+             RTS             
+             JSR     Reg6   *register 6
+             RTS             
+             JSR     Reg7   *register 7
+             RTS
+             JSR     HEX8   *Hex 8
+             RTS             
+             JSR     HEX9   *Hex 9
+             RTS             
+             JSR     HEXA   *Hex A
+             RTS             
+             JSR     HEXB   *Hex B
+             RTS             
+             JSR     HEXC   *Hex C
+             RTS             
+             JSR     HEXD   *Hex D
+             RTS             
+             JSR     HEXE   *Hex E
+             RTS             
+             JSR     HEXF   *Hex F
+             RTS             
+                                  
+*-----------------------Register number printing and hex------------------------------
+Reg0
+            MOVE.B  #'0',(A2)+ *For displaying "0"
+            RTS
+Reg1
+            MOVE.B  #'1',(A2)+ *For displaying "1"
+            RTS 
+Reg2
+            MOVE.B  #'2',(A2)+ *For displaying "2"
+            RTS  
+Reg3
+            MOVE.B  #'3',(A2)+ *For displaying "3"
+            RTS    
+Reg4
+            MOVE.B  #'4',(A2)+ *For displaying "4"
+            RTS   
+Reg5
+            MOVE.B  #'5',(A2)+ *For displaying "5"
+            RTS     
+Reg6
+            MOVE.B  #'6',(A2)+ *For displaying "6"
+            RTS    
+Reg7
+            MOVE.B  #'7',(A2)+ *For displaying "7"
+            RTS
+HEX8
+            MOVE.B #'8',(A2)+  *For displaying "8"
+            RTS
+
+HEX9
+            MOVE.B #'9',(A2)+  *For displaying "9"
+            RTS
+HEXA
+            MOVE.B #'A',(A2)+  *For displaying "A"
+            RTS
+HEXB
+            MOVE.B #'B',(A2)+  *For displaying "B"
+            RTS
+HEXC
+            MOVE.B #'C',(A2)+  *For displaying "C"
+            RTS
+HEXD
+            MOVE.B #'D',(A2)+  *For displaying "D"
+            RTS
+HEXE
+            MOVE.B #'E',(A2)+  *For displaying "E"
+            RTS
+HEXF   
+            MOVE.B #'F',(A2)+  *For displaying "F"
+            RTS        
+
+
+********************************************************************************************************************
+
+* Prints the decoded OP-Code in this order ------------------------
+* (address of code, OP-Code, addressing (if applicable) -----------      
+PRINT      
+        MOVE.B      #$00,(A2)           * add NULL value to print string
+        LEA         $0000F000,A1        * load address to start printing from
+        MOVEQ       #13,D0              * load task 13 into D0
+        TRAP        #15                  
+        BRA         MAIN                * branch to MAIN, start next decode
+              
+* Check current address to see if end address is reached -------------        
+CHECK_IF_DONE
+        CMP.L       A5,A6               *
+        BGE         FINISHED            *         
+        RTS                             * return to subroutine
+
+* The program has deconstructed from start address to end address ----
+FINISHED
+        LEA         FINISHEDPRINT,A1    * load finished message
+        MOVE        #14,D0              * load trap task 14 into D0
+        TRAP        #15
+        
+        BRA         STOP                * branch to STOP
+                       
+* End the program ----------------------------------------------------
+STOP   
+        MOVE.B      #9,D0               * move task #9
+        TRAP        #15
+  
+  
+* --------------------------------------------------------------------
+**********************************************************************
+* --------------------------------------------------------------------
+
+    
+CR      EQU         $0D
+LF      EQU         $0A
+
+* Messages to be printed ---------------------------------------------
+
+* Info about the program and how to use it
+INFO    DC.B        'Jump-9k is a EASy68K deconstructor that takes in OP-Code commands',CR,LF
+        DC.B        'and executes those commands. The commands that are acceptable must',CR,LF
+        DC.B        'be in hexadecimal format. Both capital and lower case letters are',CR,LF
+        DC.B        'accepted to be deconstructed ($00000000 to 00FFFE00)',CR,LF,CR,LF,0
+
+* different address errors 
+NOADDRESS_ERR   DC.B    'No input for address, try again',CR,LF,CR,LF,0
+INPUTTOOLARGE   DC.B    'Address input cannot exceed 8 characters',CR,LF,0
+TOOSMALLADDRESS DC.B    'Address input must be above 00000000',CR,LF,0
+TOOLARGEADDRESS DC.B    'Address input must be below 00FFFE00',CR,LF,0
+ENDBIGGERSTART  DC.B    'The end address must be bigger than the start address',CR,LF,0
+NOTEVEN         DC.B    'The address input has to be an even value...',CR,LF,0
+
+goodcode        DS.B    50
+
+
+BADINPUT DC.B       'Input is not valid try again...',CR,LF,0
+BADADDRESS DC.B     'Address input is not valid try again...',CR,LF,0
+GOODOP  DC.B        'OP Code is valid, I will pass it to John',CR,LF,0
+INPUTSTARTADD DC.B  'Enter a starting address for the deconstructor: ',0
+INPUTENDADD DC.B    CR,LF,'Enter ending address: ',0
+
+FINISHEDPRINT   DC.B    CR,LF,'The program has completed the deconstruction!!!',CR,LF,0
+
+
+SCREEN  DC.B        '///////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\',CR,LF
+        DC.B        '|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||',CR,LF
+        DC.B        '....................-.                 .-....................',CR,LF
+        DC.B        '................../´¯)                 (¯`\..................',CR,LF
+        DC.B        '................./¯../                 \..¯\.................',CR,LF
+        DC.B        '................/.../                   \...\................',CR,LF
+        DC.B        '.........../´¯¯/´´´/¯¯¯`-.         .-´¯¯¯\```\¯¯`\...........',CR,LF
+        DC.B        '........./´/../.../..../´¯\       /¯`\....\...\..\`\.........',CR,LF
+        DC.B        '........( (  ´...´. ¯ /´..`)     (´..`\ ¯ .`...`..) )........',CR,LF
+        DC.B        '.........\............`..../     \....´............/.........',CR,LF
+        DC.B        '..........\........... _.·´       `·._ .........../..........',CR,LF
+        DC.B        '...........\..........(               )........../...........',CR,LF
+        DC.B        '............\..........\             /........../............',CR,LF
+        DC.B        '.............................................................',CR,LF
+        DC.B        '|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||',CR,LF
+        DC.B        '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\//////////////////////////////',CR,LF,CR,LF,0
+ 
+PROJECT DC.B        '.............................................................',CR,LF
+        DC.B        '......_..._....._..._....._..._____..........._____..._..._..',CR,LF
+        DC.B        '.....| |.| |...| |.| |...| |.|  __ \........./ __  |.| |./ /.',CR,LF
+        DC.B        '.....| |.| |...| |.| \.../ |.| |__| |..___..| |__| |.| |/ /..',CR,LF
+        DC.B        '.....| |.| |...| |.|  \./  |.|  ___/..|___|..\___  |.|   |...',CR,LF
+        DC.B        '|-|__| |.| |___| |.| |\_/| |.| |.................| |.| |\ \..',CR,LF
+        DC.B        '|______|.|_______|.|_|...|_|.|_|.................|_|.|_|.\_\.',CR,LF
+        DC.B        '.............................................................',CR,LF,CR,LF
+        DC.B        '.................... Jump Table Junkies .....................',CR,LF
+        DC.B        '...........Bogdan Boiko, Geoffrey Lebbos, John Sliwa.........',CR,LF,CR,LF,0  
+                     
+    END    START        ; last line of source
+
+
+
+
+
+
+
+
