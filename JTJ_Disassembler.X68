@@ -578,6 +578,7 @@ _RTS
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEB
+            MOVE.B      #2,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
             MOVE.B      #'V',(A2)+
@@ -589,6 +590,7 @@ _MOVEB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEW
+            MOVE.B      #4,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
             MOVE.B      #'V',(A2)+
@@ -600,6 +602,7 @@ _MOVEW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEL
+            MOVE.B      #8,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
             MOVE.B      #'V',(A2)+
@@ -742,6 +745,7 @@ _ROL
 _ROR
 *****************************************************************************************
 _CLRB
+            MOVE.B      #2,D4
             MOVE.B      #'C',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #'R',(A2)+
@@ -750,7 +754,8 @@ _CLRB
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
-_CLRW
+_CLRW 
+            MOVE.B      #4,D4
             MOVE.B      #'C',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #'R',(A2)+
@@ -760,6 +765,7 @@ _CLRW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _CLRL
+            MOVE.B      #8,D4
             MOVE.B      #'C',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #'R',(A2)+
@@ -769,6 +775,7 @@ _CLRL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDIB
+            MOVE.B      #2,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
             MOVE.B      #'D',(A2)+
@@ -779,6 +786,7 @@ _ADDIB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDIW
+            MOVE.B      #4,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
             MOVE.B      #'D',(A2)+
@@ -789,6 +797,7 @@ _ADDIW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDIL
+            MOVE.B      #8,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
             MOVE.B      #'D',(A2)+
@@ -799,6 +808,7 @@ _ADDIL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEAB
+            MOVE.B      #2,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
             MOVE.B      #'V',(A2)+
@@ -811,6 +821,7 @@ _MOVEAB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEAW
+            MOVE.B      #4,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
             MOVE.B      #'V',(A2)+
@@ -823,6 +834,7 @@ _MOVEAW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEAL
+            MOVE.B      #8,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
             MOVE.B      #'V',(A2)+
@@ -835,6 +847,7 @@ _MOVEAL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDAW
+            MOVE.B      #4,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
             MOVE.B      #'D',(A2)+
@@ -846,6 +859,7 @@ _ADDAW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDAL
+            MOVE.B      #8,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
             MOVE.B      #'D',(A2)+
@@ -857,6 +871,7 @@ _ADDAL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDQB
+            MOVE.B      #2,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
             MOVE.B      #'D',(A2)+
@@ -868,6 +883,7 @@ _ADDQB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDQW
+            MOVE.B      #4,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
             MOVE.B      #'D',(A2)+
@@ -879,6 +895,7 @@ _ADDQW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDQL
+            MOVE.B      #8,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
             MOVE.B      #'D',(A2)+
@@ -916,6 +933,7 @@ _LEA
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _CMPB
+            MOVE.B      #2,D4
             MOVE.B      #'C',(A2)+
             MOVE.B      #'M',(A2)+
             MOVE.B      #'P',(A2)+
@@ -926,6 +944,7 @@ _CMPB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _CMPW
+            MOVE.B      #4,D4
             MOVE.B      #'C',(A2)+
             MOVE.B      #'M',(A2)+
             MOVE.B      #'P',(A2)+
@@ -936,6 +955,7 @@ _CMPW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _CMPL
+            MOVE.B      #8,D4
             MOVE.B      #'C',(A2)+
             MOVE.B      #'M',(A2)+
             MOVE.B      #'P',(A2)+
@@ -946,6 +966,7 @@ _CMPL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ANDB
+            MOVE.B      #2,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'N',(A2)+
             MOVE.B      #'D',(A2)+
@@ -956,6 +977,7 @@ _ANDB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ANDW
+            MOVE.B      #4,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'N',(A2)+
             MOVE.B      #'D',(A2)+
@@ -966,6 +988,7 @@ _ANDW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ANDL
+            MOVE.B      #8,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'N',(A2)+
             MOVE.B      #'D',(A2)+
@@ -976,6 +999,7 @@ _ANDL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ORB
+            MOVE.B      #2,D4
             MOVE.B      #'O',(A2)+
             MOVE.B      #'R',(A2)+
             MOVE.B      #'.',(A2)+
@@ -985,6 +1009,7 @@ _ORB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ORW
+            MOVE.B      #4,D4
             MOVE.B      #'O',(A2)+
             MOVE.B      #'R',(A2)+
             MOVE.B      #'.',(A2)+
@@ -994,6 +1019,7 @@ _ORW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ORL
+            MOVE.B      #8,D4
             MOVE.B      #'O',(A2)+
             MOVE.B      #'R',(A2)+
             MOVE.B      #'.',(A2)+
@@ -1003,6 +1029,7 @@ _ORL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _SUBB
+            MOVE.B      #2,D4
             MOVE.B      #'S',(A2)+
             MOVE.B      #'U',(A2)+
             MOVE.B      #'B',(A2)+
@@ -1013,6 +1040,7 @@ _SUBB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _SUBW
+            MOVE.B      #4,D4
             MOVE.B      #'S',(A2)+
             MOVE.B      #'U',(A2)+
             MOVE.B      #'B',(A2)+
@@ -1023,6 +1051,7 @@ _SUBW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _SUBL
+            MOVE.B      #8,D4
             MOVE.B      #'S',(A2)+
             MOVE.B      #'U',(A2)+
             MOVE.B      #'B',(A2)+
@@ -1033,6 +1062,7 @@ _SUBL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDB
+            MOVE.B      #2,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
             MOVE.B      #'D',(A2)+
@@ -1043,6 +1073,7 @@ _ADDB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDW
+            MOVE.B      #4,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
             MOVE.B      #'D',(A2)+
@@ -1053,6 +1084,7 @@ _ADDW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDL
+            MOVE.B      #8,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
             MOVE.B      #'D',(A2)+
@@ -1063,6 +1095,7 @@ _ADDL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEMW
+            MOVE.B      #4,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
             MOVE.B      #'V',(A2)+
@@ -1075,6 +1108,7 @@ _MOVEMW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEML
+            MOVE.B      #8,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
             MOVE.B      #'V',(A2)+
@@ -1098,6 +1132,7 @@ _MOVEQ
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR     
             
 NEXT_CODE ;set everything up for the next opcode
+            CLR         D4
             BRA         MAIN
 
 *------------------To isolate source mode------------------------
