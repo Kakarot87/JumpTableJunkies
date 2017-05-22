@@ -1,6 +1,6 @@
 *-----------------------------------------------------------
 * Title      :
-* Written by : Bogdan Boiko, John Sliwa, Geoff Lebbos
+* Written by : Bogdan Boiko
 * Date       : 05-02-2017
 * Description:
 *---------------------------------------------------------------------
@@ -1138,9 +1138,9 @@ NEXT_CODE ;set everything up for the next opcode
 *------------------To isolate source mode------------------------
 EA_5_0  ;determine source number & mode and print
             JSR     BIT3_5           *Store source mode bits into D5
-            LEA     ADDRESSTABLE, A5 *Load jump-table
+            LEA     ADDRESSTABLE, A4 *Load jump-table
             MULU    #8,D5
-            JSR (A5,D5)           
+            JSR     (A4,D5)           
             RTS 
 *------------------BIT3_5---------------------------------------      
 BIT3_5
@@ -1160,10 +1160,10 @@ BIT0_2
             RTS       
 EA_11_6 ;determine destination number & mode and print
 EA_11_9 ;determine destination number and print
-            JSR BIT9_11
-            LEA Table0_7_8_F,A5
+            JSR     BIT9_11
+            LEA     Table0_7_8_F,A4
             MULU    #8,D5
-            JSR     (A5,D5)
+            JSR     (A4,D5)
             RTS   
 
 BIT6_8  *Destination Mode
@@ -1196,28 +1196,28 @@ MOVEDEST *To figure out destination of MOVE
             BEQ   MOVEDEST111
             RTS
 MOVEDEST000 *Move destination is a data register
-            MOVE.B #'D',(A2)+
-            JSR BIT9_11
-            Lea    Table0_7_8_F,A5
-            MULU   #8,D5
-            JSR    (A5,D5)
+            MOVE.B  #'D',(A2)+
+            JSR     BIT9_11
+            Lea     Table0_7_8_F,A4
+            MULU    #8,D5
+            JSR    (A4,D5)
             RTS
             
 MOVEDEST001 *Move destination is an address register
             MOVE.B #'A',(A2)+
             JSR BIT9_11
-            Lea    Table0_7_8_F,A5
+            Lea    Table0_7_8_F,A4
             MULU   #8,D5
-            JSR    (A5,D5)
+            JSR    (A4,D5)
             RTS
 
 MOVEDEST010 *Move destinataion is indirect
             MOVE.B  #'(',(A2)+  
             MOVE.B  #'A',(A2)+ 
             JSR BIT9_11
-            Lea    Table0_7_8_F,A5
+            Lea    Table0_7_8_F,A4
             MULU   #8,D5
-            JSR    (A5,D5)
+            JSR    (A4,D5)
             MOVE.B #')',(A2)+
             RTS
             
@@ -1225,9 +1225,9 @@ MOVEDEST011 *Move destination is adress post-inc
             MOVE.B  #'(',(A2)+  
             MOVE.B  #'A',(A2)+ 
             JSR BIT9_11
-            Lea    Table0_7_8_F,A5
+            Lea    Table0_7_8_F,A4
             MULU   #8,D5
-            JSR    (A5,D5)
+            JSR    (A4,D5)
             MOVE.B #')',(A2)+
             MOVE.B #'+',(A2)+
             RTS
@@ -1237,9 +1237,9 @@ MOVEDEST100 *Move destination is address pre-dec
             MOVE.B  #'(',(A2)+  
             MOVE.B  #'A',(A2)+ 
             JSR BIT9_11
-            Lea    Table0_7_8_F,A5
+            Lea    Table0_7_8_F,A4
             MULU   #8,D5
-            JSR    (A5,D5)
+            JSR    (A4,D5)
             MOVE.B #')',(A2)+
             RTS
 MOVEDEST111 *Move destination is absolute
@@ -1275,7 +1275,7 @@ LONGDISP
 WORDISP
             CLR D5
             MOVE.B #4,D4 *Word
-            MOVE.W (A3)+,D5 *Assuming A3 has current instruction
+            MOVE.W (A6)+,D5 *Assuming A6 has current instruction
             
             
 EA_DATA ;special case for MOVEQ instruction to determine data
@@ -1284,16 +1284,16 @@ EA_DATA ;special case for MOVEQ instruction to determine data
 DESTDATAREG *For instructions with data-register only destinations (DIVU,MULU)
             MOVE.B 'D',(A2)+
             JSR BIT9_11
-            LEA Table0_7_8_F,A5
+            LEA Table0_7_8_F,A4
             MULU    #8,D5
-            JSR     (A5,D5)
+            JSR     (A4,D5)
             RTS   
 DESTADDREG *For instructions with address-only destinations (MOVEA)
             MOVE.B 'A',(A2)+
             JSR BIT9_11
-            LEA Table0_7_8_F,A5
+            LEA Table0_7_8_F,A4
             MULU    #8,D5
-            JSR     (A5,D5)
+            JSR     (A4,D5)
             RTS   
 
             
@@ -1348,9 +1348,9 @@ dataReg
             JSR     BIT0_2       
             
        *-------Figure out number of register---------*
-            Lea     Table0_7_8_F,A5
+            Lea     Table0_7_8_F,A4
             MULU    #8,D5
-            JSR     (A5,D5)
+            JSR     (A4,D5)
             RTS
 *----------------------Source is an address register------------------------------------ 
 addressReg
@@ -1358,18 +1358,18 @@ addressReg
             JSR     BIT0_2       
             
        *-------Figure out number of register---------*
-            Lea     Table0_7_8_F,A5
+            Lea     Table0_7_8_F,A4
             MULU    #8,D5
-            JSR     (A5,D5)
+            JSR     (A4,D5)
             RTS
 *----------------------Source is Indirect----------------------------------------------      
 address *Indirect
             MOVE.B #'(',(A2)+
             MOVE.B #'A',(A2)+
             JSR     BIT0_2 *Isolate bits 0-2
-            Lea     Table0_7_8_F,A5
+            Lea     Table0_7_8_F,A4
             MULU    #8,D5
-            JSR     (A5,D5)
+            JSR     (A4,D5)
             MOVE.B  #')',(A2)+
             RTS
 
@@ -1379,9 +1379,9 @@ addPostInc
             MOVE.B  #'(',(A2)+
             MOVE.B  #'A',(A2)+
             JSR     BIT0_2 *Isolate bits 0-2
-            Lea     Table0_7_8_F,A5
+            Lea     Table0_7_8_F,A4
             MULU    #8,D5
-            JSR     (A5,D5)
+            JSR     (A4,D5)
             MOVE.B  #')',(A2)+
             MOVE.B  #'+',(A2)+
             RTS
@@ -1391,9 +1391,9 @@ addPreDec
             MOVE.B  #'(',(A2)+
             MOVE.B  #'A',(A2)+
             JSR     BIT0_2 *Isolate bits 0-2
-            Lea     Table0_7_8_F,A5
+            Lea     Table0_7_8_F,A4
             MULU    #8,D5
-            JSR     (A5,D5)
+            JSR     (A4,D5)
             MOVE.B #')',(A2)+
             RTS
 *----------------------Source is immediate or absolute data------------------------------    
@@ -1423,57 +1423,57 @@ IMMEDIATE
             RTS
 *---------------------------------Immediate Byte----------------------------------------
 IMEDBYTE  
-            MOVE.W (A3)+,D3  *Assuming (A3)  holds current instruction
+            MOVE.W (A6)+,D3  *Assuming (A6)  holds current instruction
             MOVE.W D3,D2
             LSL.W #5, D2
             LSL.W #3, D2
             LSR.W #3, D2
             LSR.W #6, D2
             LSR.W #3, D2
-            LEA Table0_7_8_F,A5
+            LEA Table0_7_8_F,A4
             MULU.W #8,D2
-            JSR (A5,D2)      *Convert current value from memory to hex
+            JSR (A4,D2)      *Convert current value from memory to hex
             MOVE.W D3,D2
             LSL.W #6, D2
             LSL.W #6, D2
             LSR.W #6, D2
             LSR.W #6, D2
-            LEA Table0_7_8_F,A5
+            LEA Table0_7_8_F,A4
             MULU.W #8,D2
-            JSR (A5,D2)      *Convert current value from memory to hex
+            JSR (A4,D2)      *Convert current value from memory to hex
             RTS
             
 *---------------------------------Immediate Word-----------------------------------------           
 IMEDWORD  *Converts 4 characters to hex
-            MOVE.W (A3)+,D3  *Assuming (A3)  holds current instruction
+            MOVE.W (A6)+,D3  *Assuming (A6)  holds current instruction
             MOVE.W D3,D2
             LSR.W #6,D2
             LSR.W #6,D2
-            LEA Table0_7_8_F,A5
+            LEA Table0_7_8_F,A4
             MULU.W #8,D2
-            JSR (A5,D2)      *Convert current value from memory to hex
+            JSR (A4,D2)      *Convert current value from memory to hex
             MOVE.W D3,D2
             LSL.W #4,D2
             LSR.W #6,D2
             LSR.W #6,D2
-            LEA Table0_7_8_F,A5
+            LEA Table0_7_8_F,A4
             MULU.W #8,D2
-            JSR (A5,D2)      *Convert current value from memory to hex
+            JSR (A4,D2)      *Convert current value from memory to hex
             MOVE.W D3,D2
             LSL.W #8,D2
             LSR.W #6,D2
             LSR.W #6,D2
-            LEA Table0_7_8_F,A5
+            LEA Table0_7_8_F,A4
             MULU.W #8,D2
-            JSR (A5,D2)      *Convert current value from memory to hex
+            JSR (A4,D2)      *Convert current value from memory to hex
             MOVE.W D3,D2
             LSL.W #7,D2
             LSL.W #5,D2
             LSR.W #6,D2
             LSR.W #6,D2
-            LEA Table0_7_8_F,A5
+            LEA Table0_7_8_F,A4
             MULU.W #8,D2
-            JSR (A5,D2)      *Convert current value from memory to hex
+            JSR (A4,D2)      *Convert current value from memory to hex
             RTS   
 *---------------------------------Immediate Long----------------------------------------       
 IMEDLONG
@@ -1674,11 +1674,3 @@ PROJECT DC.B        '...........................................................
         DC.B        '...........Bogdan Boiko, Geoffrey Lebbos, John Sliwa.........',CR,LF,CR,LF,0  
                      
     END    START        ; last line of source
-
-
-
-
-
-
-
-
