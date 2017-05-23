@@ -1533,6 +1533,13 @@ _MOVEQ
 NEXT_CODE ;set everything up for the next opcode
             CLR         D4
             BRA         STARTDECODE
+            
+*------Used for Data Register Shift (LSL,ASL,LSR,LSR,ROR,ROL)--------------
+EA_2_0                      ;determine destination data register numer print (always Data reg)
+            RTS
+
+EA_11_9_5                   ;bit 5 set means register source, unset means immediate data 
+            RTS
 
 *------------------To isolate source mode------------------------
 EA_5_0  ;determine source number & mode and print
@@ -2136,3 +2143,4 @@ PROJECT DC.B        '...........................................................
         DC.B        '...........Bogdan Boiko, Geoffrey Lebbos, John Sliwa.........',CR,LF,CR,LF,0  
                      
     END    START        ; last line of source
+
