@@ -599,7 +599,8 @@ _MOVEB
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print
-            JSR         EA_11_6         ;determine destination addressing mode & number and print  
+            MOVE.B      #',',(A2)+
+            JSR         MOVEDEST  
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEW
@@ -612,7 +613,8 @@ _MOVEW
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print
-            JSR         EA_11_6         ;determine destination addressing mode & number and print     
+            MOVE.B      #',',(A2)+
+            JSR         MOVEDEST    
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEL
@@ -625,7 +627,8 @@ _MOVEL
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print
-            JSR         EA_11_6         ;determine destination addressing mode & number and print
+            MOVE.B      #',',(A2)+
+            JSR         MOVEDEST
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _BRA
@@ -857,7 +860,8 @@ _MOVEAB
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print
-            JSR         EA_11_6         ;determine destination addressing mode & number and print  
+            MOVE.B      #',',(A2)+
+            JSR         DESTADDREG  
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEAW
@@ -871,7 +875,8 @@ _MOVEAW
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print
-            JSR         EA_11_6         ;determine destination addressing mode & number and print  
+            MOVE.B      #',',(A2)+
+            JSR         DESTADDREG  
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEAL
@@ -885,7 +890,8 @@ _MOVEAL
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print
-            JSR         EA_11_6         ;determine destination addressing mode & number and print  
+            MOVE.B      #',',(A2)+
+            JSR         DESTADDREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDAW
@@ -898,7 +904,8 @@ _ADDAW
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_6         ;determine destination addressing mode & number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTADDREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDAL
@@ -911,7 +918,8 @@ _ADDAL
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_6         ;determine destination addressing mode & number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTADDREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDQB
@@ -960,7 +968,8 @@ _MULS
             MOVE.B      #'S',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _DIVU
@@ -970,7 +979,8 @@ _DIVU
             MOVE.B      #'U',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LEA
@@ -979,7 +989,8 @@ _LEA
             MOVE.B      #'A',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTADDREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _CMPB
@@ -991,7 +1002,8 @@ _CMPB
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _CMPW
@@ -1003,7 +1015,8 @@ _CMPW
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _CMPL
@@ -1015,7 +1028,8 @@ _CMPL
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ANDB
@@ -1027,7 +1041,8 @@ _ANDB
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ANDW
@@ -1039,7 +1054,8 @@ _ANDW
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ANDL
@@ -1051,7 +1067,8 @@ _ANDL
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ORB
@@ -1062,7 +1079,8 @@ _ORB
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ORW
@@ -1073,7 +1091,8 @@ _ORW
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ORL
@@ -1084,7 +1103,8 @@ _ORL
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _SUBB
@@ -1096,7 +1116,8 @@ _SUBB
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _SUBW
@@ -1108,7 +1129,8 @@ _SUBW
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _SUBL
@@ -1120,7 +1142,8 @@ _SUBL
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDB
@@ -1132,7 +1155,8 @@ _ADDB
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDW
@@ -1144,7 +1168,8 @@ _ADDW
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDL
@@ -1156,7 +1181,8 @@ _ADDL
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEMW
@@ -1195,7 +1221,8 @@ _MOVEQ
             MOVE.B      #'Q',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_DATA         ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR     
             
