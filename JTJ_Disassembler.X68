@@ -11,6 +11,7 @@ maxAddress  EQU     $00FFFE00       * max address
 storage     EQU     $0000F000       * stores instructions
 compareEnd  EQU     $0000FFF0       * stores end address in good form    
 run         EQU     $00B0 
+numOfLines  EQU     $00C0   
 
 inputMin    EQU     $0A00
 inputMax    EQU     $0B00
