@@ -610,7 +610,7 @@ MAIN:
             CMP.W       #$48C0,D5
             BEQ         _MOVEML
             CMP.W       #$7000,D5
-            BEQ         _MOVEQ
+            BEQ         _MOVEQL
             
 _DATA
             MOVE.B      #'D',(A2)+      ;Couldn't decode, print DATA
@@ -1620,16 +1620,18 @@ _MOVEML
             JSR         EA_11_9         ;determine destination number and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
-_MOVEQ
+_MOVEQL
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
             MOVE.B      #'V',(A2)+
             MOVE.B      #'E',(A2)+
             MOVE.B      #'Q',(A2)+
+            MOVE.B      #'.',(A2)+
+            MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_DATA         ;determine addressing mode & source and print
-
-            JSR         DESTDATAREG
+            JSR         EA_DATA         ;determine data
+            JSR         EA_11_9         ;determine destination number and print (Always Data Register)
+            
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR     
             
