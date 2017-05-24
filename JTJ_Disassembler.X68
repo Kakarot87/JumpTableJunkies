@@ -617,7 +617,8 @@ _DATA
             MOVE.B      #'A',(A2)+
             MOVE.B      #'T',(A2)+
             MOVE.B      #'A',(A2)+ 
-            MOVE.B      #9,(A2)+        ;tab   
+            MOVE.B      #9,(A2)+        ;tab  
+            MOVE.B      #9,(A2)+        ;tab 
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
            
@@ -626,12 +627,14 @@ _NOP
             MOVE.B      #'O',(A2)+
             MOVE.B      #'P',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _RTS
             MOVE.B      #'R',(A2)+
             MOVE.B      #'T',(A2)+
             MOVE.B      #'S',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -682,6 +685,7 @@ _BRA
             MOVE.B      #'R',(A2)+
             MOVE.B      #'A',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -689,6 +693,7 @@ _BSR
             MOVE.B      #'B',(A2)+
             MOVE.B      #'S',(A2)+
             MOVE.B      #'R',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
@@ -698,6 +703,7 @@ _BHI
             MOVE.B      #'H',(A2)+
             MOVE.B      #'I',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -705,6 +711,7 @@ _BLS
             MOVE.B      #'B',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #'S',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
@@ -714,6 +721,7 @@ _BCC
             MOVE.B      #'C',(A2)+
             MOVE.B      #'C',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -721,6 +729,7 @@ _BCS
             MOVE.B      #'B',(A2)+
             MOVE.B      #'C',(A2)+
             MOVE.B      #'S',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
@@ -730,6 +739,7 @@ _BNE
             MOVE.B      #'N',(A2)+
             MOVE.B      #'E',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -737,6 +747,7 @@ _BEQ
             MOVE.B      #'B',(A2)+
             MOVE.B      #'E',(A2)+
             MOVE.B      #'Q',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
@@ -746,6 +757,7 @@ _BVC
             MOVE.B      #'V',(A2)+
             MOVE.B      #'C',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -753,6 +765,7 @@ _BVS
             MOVE.B      #'B',(A2)+
             MOVE.B      #'V',(A2)+
             MOVE.B      #'S',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
@@ -762,6 +775,7 @@ _BPL
             MOVE.B      #'P',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -769,6 +783,7 @@ _BMI
             MOVE.B      #'B',(A2)+
             MOVE.B      #'M',(A2)+
             MOVE.B      #'I',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
@@ -778,6 +793,7 @@ _BGE
             MOVE.B      #'G',(A2)+
             MOVE.B      #'E',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -785,6 +801,7 @@ _BLT
             MOVE.B      #'B',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #'T',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
@@ -794,6 +811,7 @@ _BGT
             MOVE.B      #'G',(A2)+
             MOVE.B      #'T',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -802,6 +820,7 @@ _BLE
             MOVE.B      #'L',(A2)+
             MOVE.B      #'E',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -809,6 +828,7 @@ _JSR
             MOVE.B      #'J',(A2)+
             MOVE.B      #'S',(A2)+
             MOVE.B      #'R',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
@@ -819,6 +839,7 @@ _LSL
             MOVE.B      #'S',(A2)+
             MOVE.B      #'L',(A2)+  
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
@@ -826,6 +847,7 @@ _LSR
             MOVE.B      #'L',(A2)+
             MOVE.B      #'S',(A2)+
             MOVE.B      #'R',(A2)+  
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
@@ -835,6 +857,7 @@ _ASR
             MOVE.B      #'S',(A2)+
             MOVE.B      #'R',(A2)+  
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
@@ -842,6 +865,7 @@ _ASL
             MOVE.B      #'A',(A2)+
             MOVE.B      #'S',(A2)+
             MOVE.B      #'L',(A2)+  
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
@@ -851,6 +875,7 @@ _ROL
             MOVE.B      #'O',(A2)+
             MOVE.B      #'L',(A2)+  
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
@@ -858,6 +883,7 @@ _ROR
             MOVE.B      #'R',(A2)+
             MOVE.B      #'O',(A2)+
             MOVE.B      #'R',(A2)+  
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
@@ -1271,6 +1297,7 @@ _MULS
             MOVE.B      #'L',(A2)+
             MOVE.B      #'S',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
 
             JSR         DESTDATAREG
@@ -1282,6 +1309,7 @@ _DIVU
             MOVE.B      #'V',(A2)+
             MOVE.B      #'U',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
 
             JSR         DESTDATAREG
@@ -1291,6 +1319,7 @@ _LEA
             MOVE.B      #'L',(A2)+
             MOVE.B      #'E',(A2)+
             MOVE.B      #'A',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
 
@@ -1382,6 +1411,7 @@ _ORB
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
 
             JSR         DESTDATAREG
@@ -1394,6 +1424,7 @@ _ORW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
 
             JSR         DESTDATAREG
@@ -1405,6 +1436,7 @@ _ORL
             MOVE.B      #'R',(A2)+
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
 
