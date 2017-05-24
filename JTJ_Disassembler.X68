@@ -674,6 +674,8 @@ _MOVEL
             MOVE.B      #'E',(A2)+
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+           
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print
 
@@ -907,6 +909,9 @@ _CLRW
             MOVE.B      #'R',(A2)+
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
@@ -1315,6 +1320,8 @@ _ADDQB
             MOVE.B      #'Q',(A2)+
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         SHIFTIMMEDIATE
             MOVE.B      #',',(A2)+
@@ -1420,6 +1427,9 @@ _CMPL
             MOVE.B      #'P',(A2)+
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
 
@@ -1948,7 +1958,7 @@ Data
             BEQ    IMMEDIATE
             RTS
 *----------------------Immediate data---------------------------------------------------                       
-IMMEDIATE   
+IMMEDIATE             
             MOVE.B #'#',(A2)+
             MOVE.B #'$',(A2)+
             CMP.B #2, D4     
@@ -2274,4 +2284,3 @@ PROJECT DC.B        '...........................................................
         DC.B        '...........Bogdan Boiko, Geoffrey Lebbos, John Sliwa.........',CR,LF,CR,LF,0  
                      
     END    START        ; last line of source
-
