@@ -1384,6 +1384,7 @@ _DIVU
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LEA
+            MOVE.B      #4,D4
             MOVE.B      #'L',(A2)+
             MOVE.B      #'E',(A2)+
             MOVE.B      #'A',(A2)+
