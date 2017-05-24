@@ -1316,8 +1316,10 @@ _ADDQB
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            JSR         SHIFTIMMEDIATE
+            MOVE.B      #',',(A2)+
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_6         ;determine destination addressing mode & number and print
+
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDQW
@@ -1329,8 +1331,10 @@ _ADDQW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            JSR         SHIFTIMMEDIATE
+            MOVE.B      #',',(A2)+
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_6         ;determine destination addressing mode & number and print
+
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDQL
@@ -1342,8 +1346,10 @@ _ADDQL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            JSR         SHIFTIMMEDIATE
+            MOVE.B      #',',(A2)+
             JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_6         ;determine destination addressing mode & number and print
+            
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MULS
