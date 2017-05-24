@@ -2283,4 +2283,237 @@ PROJECT DC.B        '...........................................................
         DC.B        '.................... Jump Table Junkies .....................',CR,LF
         DC.B        '...........Bogdan Boiko, Geoffrey Lebbos, John Sliwa.........',CR,LF,CR,LF,0  
                      
+
+    
+    
+    
+    
+
+TESTPOG1
+*test ADD,ADDI,ADDA instructions
+
+          ADD.B   D0,D1
+          ADD.W     D0,D1
+          ADD.L     D0,D1
+          ADD.L     (A0),D1
+          ADD.L     (SP),D1
+          ADD.W     (A0)+,D2
+          ADD.L     -(A0),D5
+          ADD.L  #$7000,D0
+          ADD.W     $7000,D0
+          ADD.W  4(PC),D0
+          ADD.L  9(PC),D0
+          ABCD D0,D1     *DATA
+          ADDA.W D1,A0
+          ADDA.L D1,A0
+          ADDA.L    (A0),A0
+          ADDA.W    (A0)+,A5
+          ADDA.W    -(A0),A3
+          ADDA.L  #$7000,A0
+          ADDA.W    $6000,SP
+          ADDA.W  4(PC),A6
+          ADDA.L  9(PC),A5
+          ABCD D0,D1     *DATA
+          ADDI.B #$30,(A0)
+          ADDI.W #4000,(A0)+
+          ADDI.L    #$4040A0A0,-(A0)
+          ADDI.L  #$70000000,(SP)
+          ADDI.W    #$6000,(SP)
+          MOVE.L    #$FFFFFFFF,D0   
+
+
+TESTPOG2
+*test AND,ANDI,ASL,ASR,LSL,LSR,BSR,JSR,RTS
+
+          AND.B  D0,D1
+          AND.W     D0,D1
+          AND.L     D0,D1
+          AND.L     (A0),D1
+          AND.L     (SP),D1
+          AND.W     (A0)+,D2
+          AND.L     -(A0),D5
+          AND.L  #$7000,D0
+          AND.W     $7000,D0
+          AND.B  #$30,D0
+          AND.W  #4000,(A0)+
+          AND.L     #$4040A0A0,-(A0)
+          AND.L  #$70000000,(SP)
+          AND.W     #$6000,(SP)
+          ABCD D0,D1          *DATA
+          ANDI.B #$80,D1
+          ANDI.W    #$756A,D1
+          ANDI.L    #80808080,(A0)
+          ANDI.B #$80,(A0)+
+          ANDI.W    #$756A,-(A0)
+          ANDI.L    #80808080,(SP)
+          ANDI.W    #$756A,D1
+          ANDI.L    #80808080,D1
+          LSL.B     #01,D1
+          LSL.W     #01,D2
+          LSL.L     #01,D4
+          LSR.B     #01,D1
+          LSR.W     #01,D2
+          LSR.L     #01,D4
+          ABCD D0,D1
+          ASL.B     #01,D1
+          ASL.W     #01,D2
+          ASL.L     #01,D4
+          ASR.B     #01,D1
+          ASR.W     #01,D2
+          ASR.L     #01,D4
+          JSR  TESTPOG2
+          RTS
+          JMP  TESTPOG2
+          BSR  TESTPOG2
+          MOVE.L    #$FFFFFFFF,D0
+
+
+TESTPOG3
+*test CLR,CMP,CMPI,EOR,EORI,LEA
+     
+          LEA  TESTPOG3,A0
+          LEA  TESTPOG3,A7   
+          LEA  TESTPOG2,A3
+          CLR  D0
+          CLR  D7
+          CLR  (A0)+
+          CLR  -(A0)
+          CLR  (SP)
+          CLR  (SP)+
+          CLR  $07(A2,A5.L)
+          CMP  (A0),D0
+*          CMP.B  A0,D0
+*          CMP.W  SP,D6
+          CMP.L  (SP)+,D2
+          CMP  $07(A2,A3.W),D3
+          CMPA $07(A2,A3.W),A0     
+          CMPA $9(A2,A3.W),A6
+          CMPA   A0,A2
+          CMPA   A0,SP
+          CMPA   $8010A0FC,A3
+          CMPA  $8032,A1
+          CMPI  #$500,D0
+*         CMPI  #$A010A898,(A3)
+          CMPI  #$A98F,$07(A2,A3.W)
+          CMPI.L  #$A9CD8032,(A3)
+          CMPI.L  #$A984,$F(A6,A6)
+          EOR  D0,D2
+          EOR  D1,(A0)
+          EOR  D1,(A0)+
+          EOR  D1,(SP)+
+          EOR  D6,-(A0)
+*           EOR  D6,$8082
+*           EOR  D3,$A0FCA083
+*           EOR  D3,$07(A3,A2.L)
+*           EORI #$A986,D1
+*           EORI #$A98ACDC6,D1
+*           EORI #$A9,D3
+* *          EORI #$A986,$07(A3,A2.L)
+* *          EORI #$A98ACDC6,(A0)+
+*           EORI #$A9,(SP)
+*           MOVE.L    #$FFFFFFFF,D0
+          
+          
+TESTPOG4
+*test EXG,NOP,NEG,NOT,OR,ORI
+          EXG  D0,D1
+          EXG  A0,A1
+          EXG  D0,A1
+          EXG  A5,D0
+          NOP
+          NOP  
+          NOP
+          NEG  D0
+          NEG  (A0) 
+          NEG  (A0)+
+          NEG  -(A0)
+          NEG  (SP)+
+          NEG  $07(A2,A3.L)
+          NOT  D7
+          NOT  (A0) 
+          NOT  (A0)+
+          NOT  -(A0)
+          NOT  (SP)+
+          NOT  $07(A2,A3.L)
+          OR   D0,(A0)
+          OR   (A0),D7
+          OR   $07(A4,A0.L),D7
+          OR   D7,$07(A4,A0.L)
+          OR   (SP)+,D7
+          OR   (A0)+,D3
+          OR   -(A0),D1
+          OR   D1,-(A0)
+          ORI  #04,(A0)
+          ORI  #$9862,D7
+          ORI  #$2982,$07(A4,A0.L)
+          ORI  #$29,$07(A4,A0.L)
+          ORI.L     #$1,D7
+          ORI.W     #$FFFF,(A0)+
+          ORI.B     #$F,D1
+          ORI  #$A082,-(A0)
+          MOVE.L    #$FFFFFFFF,D0
+
+
+TESTPOG5
+*test ROL,ROR,SUB,SUBA,SUBI,SWAP
+
+*           SUB  D0,(A0)
+*           SUB  (A0),D7
+*           SUB  $07(A4,A0.L),D7
+*           SUB  D7,$07(A4,A0.L)
+          SUB  (SP)+,D7
+          SUB  (A0)+,D3
+          SUB  -(A0),D1
+          SUB  D1,-(A0)
+          SUBA $07(A4,A0.L),A0
+          SUBA $07(A4,A0.L),A1
+          SUBA $07(A4,A0.L),A2
+          SUBA $07(A4,A0.L),A3
+          SUBA $07(A4,A0.L),A4
+          SUBA $07(A4,A0.L),A5     
+          SUBA $07(A4,A0.L),A6
+          SUBA D0,A3
+          SUBA $00AA00AA,A7
+          SUBA $A000,SP
+          SUBI #$04,(A0)
+          SUBI #$A000,(A3)+
+          SUBI #$A000,-(SP)
+          SUBI #$FFFF,$07(A4,A0.L)
+          ROL  #8,D0
+          ROR  #8,D7
+          ROL  #1,D2
+          ROR  #3,D4
+          SWAP D0
+          SWAP D1
+          SWAP D2
+          SWAP D3
+          SWAP D4   
+          SWAP D6
+          MOVE.L    #$FFFFFFFF,D0
+     
+
+TESTPOG6
+*MOVE,MOVEA,MOVEM
+     
+          MOVE $AA00,$AB00
+          MOVE $AA00AA,$AB00AB
+          MOVE $FFAAFFBB,$ACD3F70
+          MOVE (A0),D0
+          MOVE (A0)+,D3
+          MOVE $AA00,A0
+          MOVE $AA00,SP
+          MOVE $FFFF,(SP)+
+          MOVE (SP)+,D0
+          MOVEM     A0/A1/A2/A3,(SP)-
+          MOVEM     (SP)+,A0/A1/A2/A3   
+          MOVEM     A0-A6,(SP)-
+          MOVEA     $07(A4,A0.L),A0
+          MOVEA     $00AA77FF,A6
+          MOVEA     (SP),A2
+          MOVEA     (SP)+,A3
+          MOVEA     -(A3),A4
+          MOVEA     D3,A1
+          MOVE.L    #$FFFFFFFF,D0
+          
     END    START        ; last line of source
+
