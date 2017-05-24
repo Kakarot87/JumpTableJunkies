@@ -2105,6 +2105,7 @@ PRINT
         LEA         $0000F000,A1        * load address to start printing from
         MOVEQ       #13,D0              * load task 13 into D0
         TRAP        #15                  
+        JSR         CHECK_LINES         * check if 30 lines are printed 
         RTS                             * return to subroutine
               
 * Check current address to see if end address is reached -------------        
@@ -2114,6 +2115,42 @@ CHECK_IF_DONE
         CMP.L       D5,A6               * compare D5 and A6
         BGE         FINISHED            * branch if greater or equal
         RTS                             * return to subroutine
+        
+* Checks how many lines are on the display at one time ---------------    
+CHECK_LINES
+        LEA         numOfLines,A4       * load number of lines storage address into A4
+        ADDI.B      #$1,(A4)             * add 1 to the line counter
+        CMPI.B      #$1E,(A4)            * compare if number of lines is 30
+        BEQ         LINE_LIMIT          * branch if equal to 30
+        RTS                             * return to subroutine 
+
+* Allows to print only 30 lines of OP code per page ------------------
+LINE_LIMIT
+        LEA         NEXT_PAGE,A1        * load NEXT_PAGE message
+        CLR         D0                  * clear D0
+        MOVE        #14,D0              * load trap task 14 into D0
+        TRAP        #15
+        
+        MOVE.B      #2,D0               * move task #2 to D0
+        TRAP        #15 
+        
+        CMPI.B      #$2,D0              * compare if input is 
+        BEQ         CONTINUE_PRINT      * branch to CONTINUE_PRINT if equal
+        BRA         DONT_CONTINUE       * branch to DONT_CONTINUE
+
+* Prevents from going to next page if enter is not pressed -----------
+DONT_CONTINUE
+        MOVE.B      #2,D0               * move task #2 to D0
+        TRAP        #15 
+
+        CMPI.B      #$2,D0              * compare if input is 
+        BEQ         CONTINUE_PRINT      * branch to CONTINUE_PRINT if equal
+        BRA         DONT_CONTINUE       * branch to DONT_CONTINUE
+
+* Goes back to printing OP-codes -------------------------------------
+CONTINUE_PRINT
+        RTS                             * return to subroutine
+
 * The program has deconstructed from start address to end address ----
 FINISHED
         LEA         FINISHEDPRINT,A1    * load finished message
@@ -2216,6 +2253,7 @@ NOTEVEN         DC.B    'The address input has to be an even value...',CR,LF,0
 
 RUNAGAIN        DC.B    'Do you want to run the program again? (y,n) ',0
 BAD_ANSWER      DC.B    CR,LF,'Invalid answer, please input y or n ',0
+NEXT_PAGE       DC.B    'Please click Enter to go to next page...',0
 
 BADINPUT DC.B       'Input is not valid try again...',CR,LF,0
 BADADDRESS DC.B     'Address input is not valid try again...',CR,LF,0
