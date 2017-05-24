@@ -2132,6 +2132,7 @@ LINE_LIMIT
         MOVE        #14,D0              * load trap task 14 into D0
         TRAP        #15
         
+        LEA         run,A1              * load end address to be stored
         MOVE.B      #2,D0               * move task #2 to D0
         TRAP        #15 
         
