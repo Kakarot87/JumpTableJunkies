@@ -1825,6 +1825,7 @@ EA_DATA ;special case for MOVEQ instruction to determine data
 
 *--------------------------------------------------------------------------------------
 DESTDATAREG *For instructions with data-register only destinations (DIVU,MULU)
+            MOVE.B #',',(A2)+
             MOVE.B #'D',(A2)+
             JSR BIT9_11
             LEA Table0_7_8_F,A4
@@ -1832,6 +1833,7 @@ DESTDATAREG *For instructions with data-register only destinations (DIVU,MULU)
             JSR     (A4,D5)
             RTS   
 DESTADDREG *For instructions with address-only destinations (MOVEA)
+            MOVE.B #',',(A2)+
             MOVE.B #'A',(A2)+
             JSR BIT9_11
             LEA Table0_7_8_F,A4
