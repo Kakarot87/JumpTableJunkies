@@ -1445,11 +1445,7 @@ _ANDB
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-
-            JSR         DESTDATAREG
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ANDW
             MOVE.B      #4,D4
             MOVE.B      #'A',(A2)+
@@ -1458,11 +1454,8 @@ _ANDW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 
-            JSR         DESTDATAREG
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ANDL
             MOVE.B      #8,D4
             MOVE.B      #'A',(A2)+
@@ -1471,11 +1464,7 @@ _ANDL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-
-            JSR         DESTDATAREG
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ORB
             MOVE.B      #2,D4
             MOVE.B      #'O',(A2)+
@@ -1484,11 +1473,7 @@ _ORB
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-
-            JSR         DESTDATAREG
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ORW
             MOVE.B      #4,D4
             MOVE.B      #'O',(A2)+
@@ -1497,11 +1482,7 @@ _ORW
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-
-            JSR         DESTDATAREG
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ORL
             MOVE.B      #8,D4
             MOVE.B      #'O',(A2)+
@@ -1510,11 +1491,7 @@ _ORL
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-
-            JSR         DESTDATAREG
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _SUBB
             MOVE.B      #2,D4
             MOVE.B      #'S',(A2)+
@@ -1523,11 +1500,7 @@ _SUBB
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-
-            JSR         DESTDATAREG
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _SUBW
             MOVE.B      #4,D4
             MOVE.B      #'S',(A2)+
@@ -1536,11 +1509,7 @@ _SUBW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-
-            JSR         DESTDATAREG
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _SUBL
             MOVE.B      #8,D4
             MOVE.B      #'S',(A2)+
@@ -1549,11 +1518,7 @@ _SUBL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-
-            JSR         DESTDATAREG
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ADDB
             MOVE.B      #2,D4
             MOVE.B      #'A',(A2)+
@@ -1562,11 +1527,7 @@ _ADDB
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-
-            JSR         DESTDATAREG
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ADDW
             MOVE.B      #4,D4
             MOVE.B      #'A',(A2)+
@@ -1575,11 +1536,7 @@ _ADDW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-
-            JSR         DESTDATAREG
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ADDL
             MOVE.B      #8,D4
             MOVE.B      #'A',(A2)+
@@ -1588,11 +1545,7 @@ _ADDL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-
-            JSR         DESTDATAREG
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _MOVEMW
             MOVE.B      #4,D4
             MOVE.B      #'M',(A2)+
@@ -1603,10 +1556,7 @@ _MOVEMW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _MOVEML
             MOVE.B      #8,D4
             MOVE.B      #'M',(A2)+
@@ -1617,10 +1567,7 @@ _MOVEML
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         EA_5_0          ;determine addressing mode & source and print
-            JSR         EA_11_9         ;determine destination number and print
-            JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _MOVEQL
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
@@ -1640,6 +1587,27 @@ NEXT_CODE ;set everything up for the next opcode
             CLR         D4
             BRA         STARTDECODE
             
+*------Used for Direction bit on OR,SUB,AND,ADD--------------
+DIRECTION
+            MOVE.W      D6,D5
+            LSL.W       #7,D5
+            LSR.W       #7,D5
+            LSR.W       #8,D5           ;D5 NOW HAS DIRECTION BIT
+            CMP.B       #1,D5
+            BEQ         DN_EA           ; Dn TO <ea>
+EA_DN
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            MOVE.B      #',',(A2)+
+            JSR         DESTDATAREG
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+DN_EA
+
+            JSR         DESTDATAREG
+            MOVE.B      #',',(A2)+
+            JSR         EA_5_0          ;determine addressing mode & source and print
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 *------Used for Data Register Shift (LSL,ASL,LSR,LSR,ROR,ROL)--------------
 EA_2_0                      ;determine destination data register numer print (always Data reg)
             RTS
@@ -1826,7 +1794,6 @@ EA_DATA ;special case for MOVEQ instruction to determine data
 
 *--------------------------------------------------------------------------------------
 DESTDATAREG *For instructions with data-register only destinations (DIVU,MULU)
-            MOVE.B #',',(A2)+
             MOVE.B #'D',(A2)+
             JSR BIT9_11
             LEA Table0_7_8_F,A4
@@ -1834,7 +1801,6 @@ DESTDATAREG *For instructions with data-register only destinations (DIVU,MULU)
             JSR     (A4,D5)
             RTS   
 DESTADDREG *For instructions with address-only destinations (MOVEA)
-            MOVE.B #',',(A2)+
             MOVE.B #'A',(A2)+
             JSR BIT9_11
             LEA Table0_7_8_F,A4
