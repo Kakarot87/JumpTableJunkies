@@ -1392,7 +1392,7 @@ _LEA
             MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_5_0          ;determine addressing mode & source and print
-
+            MOVE.B      #',',(A2)+
             JSR         DESTADDREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
