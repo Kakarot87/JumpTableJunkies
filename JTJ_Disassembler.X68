@@ -647,7 +647,9 @@ _MOVEB
             MOVE.B      #'E',(A2)+
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
-            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        
+            MOVE.B      #' ',(A2)+      
+            MOVE.B      #' ',(A2)+ 
             JSR         EA_5_0          ;determine source addressing mode & number and print
 
             JSR         MOVEDEST  
