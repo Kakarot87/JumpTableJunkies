@@ -938,6 +938,10 @@ _ADDIB
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #'#',(A2)+
+            MOVE.B      #'$',(A2)+
+            JSR         IMEDBYTE        ;print immediate byte
+            MOVE.B      #',',(A2)+
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -950,6 +954,11 @@ _ADDIW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #'#',(A2)+
+            MOVE.B      #'$',(A2)+
+            JSR         IMEDWORD        ;print immediate word
+            MOVE.B      #',',(A2)+
+
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -962,6 +971,11 @@ _ADDIL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #'#',(A2)+
+            MOVE.B      #'$',(A2)+
+            JSR         IMEDLONG        ;print immediate long
+            MOVE.B      #',',(A2)+
+
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -1579,10 +1593,9 @@ _MOVEQL
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_DATA         ;determine data
-            JSR         EA_11_9         ;determine destination number and print (Always Data Register)
-            
+            JSR         DESTDATAREG     ;Destination is always data register      
             JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR     
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR       
             
 NEXT_CODE ;set everything up for the next opcode
             CLR         D4
@@ -1672,8 +1685,8 @@ BIT5 *Used to acquire if source of LS/AS/RO is immediate or register
             BEQ      SHIFTFROMDN
 SHIFTIMMEDIATE
             MOVE.B   #'#',(A2)+      *Immediate data
-            JSR      BIT9_11        *Figure out shift immediate number
-            CMP      #0,D5         *Shift ammount is 8
+            JSR      BIT9_11         *Figure out shift immediate number
+            CMP      #0,D5           *Shift ammount is 8
             BEQ      SHIFT8
             Lea      Table0_7_8_F,A4 *Number isn't 8, use jump table to figure out shift ammount
             MULU     #8,D5
@@ -1693,20 +1706,20 @@ SHIFTFROMDN *Shifting from  a number in a data register
             RTS           
 *---------Subroutine for figuring out Move destination---------------------
 MOVEDEST *To figure out destination of MOVE
-            MOVE.B #',',(A2)+  *Comma between source/dest
-            JSR BIT6_8        *Figure out destination mode
-            CMP.W #%000, D5   *Check if data register
-            BEQ MOVEDEST000
-            CMP.W #%001, D5   *Check if address register
-            BEQ MOVEDEST001   
-            CMP.W #%010,D5    *Check if indirect
-            BEQ MOVEDEST010   
-            CMP.W  #%011,D5   *Check if adress post-inc
-            BEQ   MOVEDEST011 
-            CMP.W  #%100,D5   *Check if address pre-dec
-            BEQ   MOVEDEST100 
-            CMP.W  #%111,D5   *Check if immediate/absolute
-            BEQ   MOVEDEST111
+            MOVE.B   #',',(A2)+  *Comma between source/dest
+            JSR      BIT6_8        *Figure out destination mode
+            CMP.W    #%000, D5   *Check if data register
+            BEQ      MOVEDEST000
+            CMP.W    #%001, D5   *Check if address register
+            BEQ      MOVEDEST001   
+            CMP.W    #%010,D5    *Check if indirect
+            BEQ      MOVEDEST010   
+            CMP.W    #%011,D5   *Check if adress post-inc
+            BEQ      MOVEDEST011 
+            CMP.W    #%100,D5   *Check if address pre-dec
+            BEQ      MOVEDEST100 
+            CMP.W    #%111,D5   *Check if immediate/absolute
+            BEQ      MOVEDEST111
             RTS
 MOVEDEST000 *Move destination is a data register
             MOVE.B  #'D',(A2)+
@@ -1717,63 +1730,63 @@ MOVEDEST000 *Move destination is a data register
             RTS
             
 MOVEDEST001 *Move destination is an address register
-            MOVE.B #'A',(A2)+
-            JSR BIT9_11
-            Lea    Table0_7_8_F,A4
-            MULU   #8,D5
+            MOVE.B  #'A',(A2)+
+            JSR     BIT9_11
+            Lea     Table0_7_8_F,A4
+            MULU    #8,D5
             JSR    (A4,D5)
             RTS
 
 MOVEDEST010 *Move destinataion is indirect
             MOVE.B  #'(',(A2)+  
             MOVE.B  #'A',(A2)+ 
-            JSR BIT9_11
-            Lea    Table0_7_8_F,A4
-            MULU   #8,D5
-            JSR    (A4,D5)
-            MOVE.B #')',(A2)+
+            JSR     BIT9_11
+            Lea     Table0_7_8_F,A4
+            MULU    #8,D5
+            JSR     (A4,D5)
+            MOVE.B   #')',(A2)+
             RTS
             
 MOVEDEST011 *Move destination is adress post-inc
             MOVE.B  #'(',(A2)+  
             MOVE.B  #'A',(A2)+ 
-            JSR BIT9_11
-            Lea    Table0_7_8_F,A4
-            MULU   #8,D5
-            JSR    (A4,D5)
-            MOVE.B #')',(A2)+
-            MOVE.B #'+',(A2)+
+            JSR     BIT9_11
+            Lea     Table0_7_8_F,A4
+            MULU    #8,D5
+            JSR     (A4,D5)
+            MOVE.B  #')',(A2)+
+            MOVE.B  #'+',(A2)+
             RTS
 
 MOVEDEST100 *Move destination is address pre-dec
-            MOVE.B #'-',(A2)+
+            MOVE.B  #'-',(A2)+
             MOVE.B  #'(',(A2)+  
             MOVE.B  #'A',(A2)+ 
-            JSR BIT9_11
-            Lea    Table0_7_8_F,A4
-            MULU   #8,D5
-            JSR    (A4,D5)
-            MOVE.B #')',(A2)+
+            JSR     BIT9_11
+            Lea     Table0_7_8_F,A4
+            MULU    #8,D5
+            JSR     (A4,D5)
+            MOVE.B  #')',(A2)+
             RTS
 MOVEDEST111 *Move destination is absolute
-            MOVE.B D6,D5
-            LSL.B #3,D5
-            LSL.B #2,D5
-            LSR.B #2,D5
-            LSR.B #3,D5
-            CMP.B #%100,D5
-            BEQ MVDSTLNG
-            CMP.B #0,D5
-            BEQ MVDSTWRD  
+            MOVE.B  D6,D5
+            LSL.B   #3,D5
+            LSL.B   #2,D5
+            LSR.B   #2,D5
+            LSR.B   #3,D5
+            CMP.B   #%100,D5
+            BEQ     MVDSTLNG
+            CMP.B   #0,D5
+            BEQ     MVDSTWRD  
             RTS    
 MVDSTLNG
-            MOVE.B #'$',(A2)+
-            JSR IMEDWORD 
-            JSR IMEDWORD 
+            MOVE.B  #'$',(A2)+
+            JSR     IMEDWORD 
+            JSR     IMEDWORD 
             RTS
 MVDSTWRD      
-            MOVE.B #'$',(A2)+
-            JSR IMEDWORD 
+            MOVE.B  #'$',(A2)+
+            JSR     IMEDWORD 
             RTS
 *--------------------------------------------------------------------------------------
 DISPLACEMENT ;special case for BRA instructions
@@ -1927,28 +1940,46 @@ ADD_E       * Add E to be printed
 ADD_F       * Add F to be printed
             JSR         HEXF                    * jumpt to HEXF
             BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
-            
+*--------------------------------------------------------------------------------------              
 EA_DATA ;special case for MOVEQ instruction to determine data
+            MOVE.B  #'#',(A2)+       *To signify immediate data
+            MOVE.B  #'$',(A2)+       *Printing in hex
+            CLR     D5
+            MOVE.B  D6,D5            *Byte holds immediate data
+            LSR.B   #4,D5            *Grab first character of immediate data
+            LEA     Table0_7_8_F,A4  *Load jump table
+            MULU.W  #8,D5            *For offset 
+            JSR     (A4,D5)          *Print first character of immediate data   
+  
+            CLR     D5               *Clear to print second character
+            MOVE.B  D6,D5            *Obtain data
+            LSL.B   #4,D5            *Shift out first hex character
+            LSR.B   #4,D5            *Shift second character back to its place
+            LEA     Table0_7_8_F,A4  *Load jump table
+            MULU.W  #8,D5            *For offset 
+            JSR     (A4,D5)          *Print first character of immediate data
+            RTS
 
 *--------------------------------------------------------------------------------------
 DESTDATAREG *For instructions with data-register only destinations (DIVU,MULU)
-            MOVE.B #'D',(A2)+
-            JSR BIT9_11
-            LEA Table0_7_8_F,A4
+            MOVE.B  #',',(A2)+
+            MOVE.B  #'D',(A2)+
+            JSR     BIT9_11
+            LEA     Table0_7_8_F,A4
             MULU    #8,D5
             JSR     (A4,D5)
             RTS   
 DESTADDREG *For instructions with address-only destinations (MOVEA)
-            MOVE.B #'A',(A2)+
-            JSR BIT9_11
-            LEA Table0_7_8_F,A4
+            MOVE.B  #'A',(A2)+
+            JSR     BIT9_11
+            LEA     Table0_7_8_F,A4
             MULU    #8,D5
             JSR     (A4,D5)
             RTS   
 SOURCEDATAREG       *Used mainly for shift instructions
-            MOVE.B #'D',(A2)+
+            MOVE.B  #'D',(A2)+
             JSR     BIT0_2
-            LEA Table0_7_8_F,A4
+            LEA     Table0_7_8_F,A4
             MULU    #8,D5
             JSR     (A4,D5)
             RTS                
@@ -2050,87 +2081,107 @@ addPreDec
             Lea     Table0_7_8_F,A4
             MULU    #8,D5
             JSR     (A4,D5)
-            MOVE.B #')',(A2)+
+            MOVE.B  #')',(A2)+
             RTS
 *----------------------Source is immediate or absolute data------------------------------    
 Data
-            MOVE.B D6,D5
-            LSL.B #2,D5
-            LSL.B #3,D5
-            LSR.B #2,D5
-            LSR.B #3,D5
-            CMPI.B #%001,D5   *Checking if absolute long
-            BEQ    ABSLONG
-            CMPI.B #%000,D5   *Checking if absolute word
-            BEQ    ABSWORD
-            CMPI.B #%100,D5   *Checking for immediate data
-            BEQ    IMMEDIATE
+            MOVE.B  D6,D5
+            LSL.B   #2,D5
+            LSL.B   #3,D5
+            LSR.B   #2,D5
+            LSR.B   #3,D5
+            CMPI.B  #%001,D5   *Checking if absolute long
+            BEQ     ABSLONG
+            CMPI.B  #%000,D5   *Checking if absolute word
+            BEQ     ABSWORD
+            CMPI.B  #%100,D5   *Checking for immediate data
+            BEQ     IMMEDIATE
             RTS
 *----------------------Immediate data---------------------------------------------------                       
 IMMEDIATE             
-            MOVE.B #'#',(A2)+
-            MOVE.B #'$',(A2)+
-            CMP.B #2, D4     
-            BEQ   IMEDBYTE   *Check if byte data
-            CMP.B #4, D4     
-            BEQ   IMEDWORD   *Check if word data
-            CMP.B #8, D4     
-            BEQ   IMEDLONG   *Check if long data
+            MOVE.B  #'#',(A2)+
+            MOVE.B  #'$',(A2)+
+            CMP.B   #2, D4     
+            BEQ     IMEDBYTE   *Check if byte data
+            CMP.B    #4, D4     
+            BEQ     IMEDWORD   *Check if word data
+            CMP.B   #8, D4     
+            BEQ     IMEDLONG   *Check if long data
+            RTS
+*--------------------------------Shifts------------------------------------------------
+WORDSHIFT1
+            LSR.W   #6,D2
+            LSR.W   #6,D2
+            RTS
+WORDSHIFT2
+            LSL.W   #4,D2
+            LSR.W   #6,D2
+            LSR.W   #6,D2
+            RTS
+
+WORDSHIFT3
+            LSL.W   #8,D2
+            LSR.W   #6,D2
+            LSR.W   #6,D2
+            RTS
+WORDSHIFT4
+            LSL.W   #7,D2
+            LSL.W   #5,D2
+            LSR.W   #6,D2
+            LSR.W   #6,D2
+            RTS
+
+BYTESHIFT1
+            LSL.W   #8,D2
+            LSR.W   #6,D2
+            LSR.W   #6,D2
+            RTS
+
+BYTESHIFT2
+            LSL.W   #6,D2
+            LSL.W   #6,D2
+            LSR.W   #6,D2
+            LSR.W   #6,D2
             RTS
 *---------------------------------Immediate Byte----------------------------------------
 IMEDBYTE  
-            MOVE.W (A6)+,D3  *Assuming (A6)  holds current instruction
-            MOVE.W D3,D2
-            LSL.W #5, D2
-            LSL.W #3, D2
-            LSR.W #3, D2
-            LSR.W #6, D2
-            LSR.W #3, D2
-            LEA Table0_7_8_F,A4
-            MULU.W #8,D2
-            JSR (A4,D2)      *Convert current value from memory to hex
-            MOVE.W D3,D2
-            LSL.W #6, D2
-            LSL.W #6, D2
-            LSR.W #6, D2
-            LSR.W #6, D2
-            LEA Table0_7_8_F,A4
-            MULU.W #8,D2
-            JSR (A4,D2)      *Convert current value from memory to hex
+            MOVE.W  (A6)+,D3         *Assuming (A6)  holds current instruction
+            MOVE.W  D3,D2
+            JSR     BYTESHIFT1
+            LEA     Table0_7_8_F,A4
+            MULU.W  #8,D2
+            JSR     (A4,D2)          *Convert current value from memory to hex
+            MOVE.W  D3,D2
+            JSR     BYTESHIFT2
+            LEA     Table0_7_8_F,A4
+            MULU.W  #8,D2            *For offset
+            JSR     (A4,D2)          *Convert current value from memory to hex
             RTS
             
 *---------------------------------Immediate Word-----------------------------------------           
 IMEDWORD  *Converts 4 characters to hex
-            MOVE.W (A6)+,D3  *Assuming (A6)  holds current instruction
-            MOVE.W D3,D2
-            LSR.W #6,D2
-            LSR.W #6,D2
-            LEA Table0_7_8_F,A4
-            MULU.W #8,D2
-            JSR (A4,D2)      *Convert current value from memory to hex
-            MOVE.W D3,D2
-            LSL.W #4,D2
-            LSR.W #6,D2
-            LSR.W #6,D2
-            LEA Table0_7_8_F,A4
-            MULU.W #8,D2
-            JSR (A4,D2)      *Convert current value from memory to hex
-            MOVE.W D3,D2
-            LSL.W #8,D2
-            LSR.W #6,D2
-            LSR.W #6,D2
-            LEA Table0_7_8_F,A4
-            MULU.W #8,D2
-            JSR (A4,D2)      *Convert current value from memory to hex
-            MOVE.W D3,D2
-            LSL.W #7,D2
-            LSL.W #5,D2
-            LSR.W #6,D2
-            LSR.W #6,D2
-            LEA Table0_7_8_F,A4
-            MULU.W #8,D2
-            JSR (A4,D2)      *Convert current value from memory to hex
-            RTS   
+            MOVE.W  (A6)+,D3        *Assuming (A6)  holds current instruction
+            MOVE.W  D3,D2
+            JSR     WORDSHIFT1      *Shift first character
+            LEA     Table0_7_8_F,A4 *Load table
+            MULU.W  #8,D2
+            JSR     (A4,D2)         *Convert current value from memory to hex
+            MOVE.W  D3,D2
+            JSR     WORDSHIFT2       *Shift second character
+            LEA     Table0_7_8_F,A4 *Load table
+            MULU.W  #8,D2
+            JSR     (A4,D2)         *Convert current value from memory to hex
+            MOVE.W  D3,D2
+            JSR     WORDSHIFT3      *Shift third character
+            LEA     Table0_7_8_F,A4 *Load table
+            MULU.W  #8,D2
+            JSR     (A4,D2)         *Convert current value from memory to hex
+            MOVE.W  D3,D2
+            JSR     WORDSHIFT4      *Shift fourth character
+            LEA     Table0_7_8_F,A4  
+            MULU.W  #8,D2           *For offset
+            JSR     (A4,D2)         *Convert current value from memory to hex
+            RTS  
 *---------------------------------Immediate Long----------------------------------------       
 IMEDLONG
             JSR IMEDWORD *First 4 characters
