@@ -1571,7 +1571,12 @@ _MOVEMW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
+            
+            JSR         BIT9_11         ;isolate data bits 9-11 into D5
+            CMP.B       #%100,D5        ;register to memory
+            BEQ         _MOVEMRTM
+            CMP.B       #%110,D5        ;memory to register
+            BEQ         _MOVEMMTR
 _MOVEML
             MOVE.B      #8,D4
             MOVE.B      #'M',(A2)+
@@ -1582,7 +1587,13 @@ _MOVEML
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
+            
+            JSR         BIT9_11         ;isolate data bits 9-11 into D5
+            CMP.B       #%100,D5        ;register to memory
+            BEQ         _MOVEMRTM
+            CMP.B       #%110,D5        ;memory to register
+            BEQ         _MOVEMMTR
+
 _MOVEQL
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
@@ -1593,14 +1604,224 @@ _MOVEQL
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             JSR         EA_DATA         ;determine data
-            JSR         DESTDATAREG     ;Destination is always data register      
+            JSR         EA_11_9         ;determine destination number and print (Always Data Register)
+            
             JSR         PRINT           ;print the buffer
-            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR       
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR     
             
 NEXT_CODE ;set everything up for the next opcode
             CLR         D4
             BRA         STARTDECODE
+
+***************************************************************
+*specific MOVEM routines
+***************************************************************
+*MOVEM Memory to Register  
+_MOVEMMTR
+            MOVE.W      D6,D5
+            JSR     	BIT3_5          ;puts bits 3-5 ONLY in D5
             
+            CMP.B   	#%010,D5        ;test for (An)
+            BEQ     	_An             ;
+            CMP.B   	#%011,D5        ;test for (An)+
+            BEQ     	_An_PLUS        ;
+            CMP.B   	#%101,D5        ;test for (d16,An)
+            BEQ     	_d16_An         ;
+            CMP.B   	#%110,D5        ;test for (d8,An,Xn)
+            BEQ     	_d8_An_Xn       ;
+            CMP.B   	#%111,D5        ;test for (d8,An,Xn)
+            BNE     	_DATA           ;not allowed else CONTINUE & figure out register to determine mode
+            
+            MOVE.W      D6,D5
+            JSR     	BIT0_2          ;puts bits 0-2 ONLY in D5
+            
+            CMP.B   	#%000,D5        ;test for (xxx).W
+            BEQ     	_xxxW           ;
+            CMP.B   	#%001,D5        ;test for (xxx).L
+            BEQ     	_xxxL           ;
+            CMP.B   	#%010,D5        ;test for  (d16,PC)
+            BEQ     	_d16_PC         ;
+            CMP.B   	#%011,D5        ;test for  (d8,PC,Xn)
+            BEQ     	_d8_PC_Xn       ;
+
+_An
+            RTS
+_d16_An
+            RTS
+_d8_An_Xn      
+            RTS 
+_xxxW 
+            RTS
+_xxxL   
+            RTS
+_d16_PC 
+            RTS
+_d8_PC_Xn
+            RTS
+            
+
+***************************************************************
+*MOVEM Register to memory
+_MOVEMRTM
+            MOVE.W      D6,D5
+            JSR     	BIT3_5          ;puts bits 3-5 ONLY in D5
+            
+            CMP.B   	#%010,D5        ;test for (An) Address Register Indirect Mode 
+            BEQ     	_An             ;
+            CMP.B   	#%100,D5        ;test for -(An) Address Register Indirect with Predecrement Mode 
+            BEQ     	_MIN_An         ;
+            CMP.B   	#%101,D5        ;test for (d16,An) Address Register Indirect with Displacement Mode
+            BEQ     	_d16_An         ;
+            CMP.B   	#%110,D5        ;test for (d8,An,Xn) Address Register Indirect with Index (8-Bit Displacement) Mode
+            BEQ     	_d8_An_Xn       ;
+            CMP.B   	#%111,D5        ;test for not allowed
+            BNE     	_DATA           ;not allowed else CONTINUE & figure out register to determine mode
+            
+            MOVE.W      D6,D5
+            JSR     	BIT0_2          ;puts bits 0-2 ONLY in D5
+            
+            CMP.B   	#%000,D5        ;test for (xxx).W Absolute Data Addressing short
+            BEQ     	_xxxW           ;
+            CMP.B   	#%001,D5        ;test for (xxx).L Absolute Data Addressing long
+            BEQ     	_xxxL           ; 
+
+*****************************************************************
+* pre decrement mode If the effective address is specified by the predecrement mode, 
+* only a register-to-memory operation is allowed. 
+* MSB to LSB (16->0) D0 D1 D2 D3 D4 D5 D6 D7 A0 A1 A2 A3 A4 A5 A6 A7 
+*----------------------------------------------------------------
+* address register pre decrement mode  
+_MIN_An
+            MOVE.W      D6,D5
+            JSR     	BIT0_2          ;puts bits 0-2 ONLY in D5
+            MOVE.W      D5,D3           ;Copy D5, into D3 for use in final print
+            
+            MOVE.W  	(A6)+,D6        ;read word with register list and increment
+	        MOVE.W  	D6,D5           ;copy to D5 to work on it
+	        
+            CMP.B   	#0,D5           ;are there any address registers in this byte?
+            BEQ     	PD_START_D      ;no, move to data registers
+            CLR         D2              ;Clear D2 counter
+PD_CHK_A     
+            CMP     	#8,D2           ;have we read the whole byte? done with this byte, move to next 
+            BEQ         PD_START_D      ;Finished with this byte go do data bytes
+            LSL.B   	#1,D5           ;shift first bit out (Starts at A0)
+            BCS     	PD_LOOP_A       ;if set, print the register # 
+            ADDI.B  	#1,D2           ;not set, increment counter & loop back
+            BRA         PD_CHK_A 
+PD_LOOP_A
+            MOVE.B  	#'A',(A2)+      ;print A
+            CLR         D4
+            MOVE.B  	D2,D4           ;copy counter
+            MULU    	#8,D4           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D4)         ;get register number and print it
+            MOVE.B  	#'/',(A2)+      ;print /
+            ADDI.B  	#1,D2           ;increment counter
+            BRA         PD_CHK_A
+
+PD_START_D  
+	        MOVE.W  	D6,D5           ;copy to D5 to work on it
+	        LSR.W       #8,D5           ;Shift to work on data register list now
+            CMP.B   	#0,D5           ;are there any data registers in this byte?
+            BEQ     	PD_DONE         ;no, finish
+            CLR         D2              ;Clear D2 counter
+PD_CHK_D     
+            CMP     	#8,D2           ;have we read the whole byte? done with this byte, move to next 
+            BEQ         PD_DONE         ;Finished with this byte go find destination
+            LSL.B   	#1,D5           ;shift first bit out (Starts at D0)
+            BCS     	PD_LOOP_D       ;if set, print the register #  
+            ADDI.B  	#1,D2           ;not set, increment counter & loop back
+            BRA         PD_CHK_D         
+PD_LOOP_D
+            MOVE.B  	#'D',(A2)+      ;print D
+            CLR         D4
+            MOVE.B  	D2,D4           ;copy counter
+            MULU    	#8,D4           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D4)         ;get register number and print it
+            MOVE.B  	#'/',(A2)+      ;print /
+            ADDI.B  	#1,D2           ;increment counter
+            BRA         PD_CHK_D
+PD_DONE
+            MOVE.B  	#',',-(A2)      ;print ',' (overwrites last '/' charecter) 
+            MOVE.B  	#',',(A2)+      ;print ',' (overwrites last '/' charecter) 
+            MOVE.B  	#'-',(A2)+      ;print -
+            MOVE.B  	#'(',(A2)+      ;print (
+            MOVE.B  	#'A',(A2)+      ;print A
+            MULU    	#8,D3           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D3)         ;get register number and print it
+            MOVE.B  	#')',(A2)+      ;print )
+            
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
+
+*********************************************************
+*Post Increment Mode
+*If the effective address is specified by the postincrement 
+*mode, only a memory-to-register operation is allowed
+*********************************************************
+_An_PLUS
+            MOVE.W      D6,D5
+            JSR     	BIT0_2          ;puts bits 0-2 ONLY in D5
+
+            MOVE.B  	#'(',(A2)+      
+            MOVE.B  	#'A',(A2)+      
+            MULU    	#8,D5           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D5)         ;get register number and print it
+            MOVE.B  	#')',(A2)+      
+            MOVE.B  	#'+',(A2)+      
+            MOVE.B  	#',',(A2)+                 
+            
+            MOVE.W  	(A6)+,D6        ;read word with register list and increment
+	        MOVE.W  	D6,D5           ;copy to D5 to work on it
+            CLR         D2              ;Clear D2 counter    
+PI_CHK_D     
+            CMP     	#8,D2           ;have we read the whole byte? done with this byte, move to next 
+            BEQ         PI_START_A      ;Finished with this byte go do Address bytes
+            LSR.W   	#1,D5           ;shift first bit out (Starts at D0)
+            BCS     	PI_LOOP_D       ;if set, print the register # 
+            ADDI.B  	#1,D2           ;not set...increment counter, read next bit
+            BRA         PI_CHK_D        
+PI_LOOP_D
+            MOVE.B  	#'D',(A2)+      
+            CLR         D4
+            MOVE.B  	D2,D4           ;copy counter
+            MULU    	#8,D4           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D4)         ;get register number and print it
+            MOVE.B  	#'/',(A2)+      
+            ADDI.B  	#1,D2           ;increment counter
+            BRA         PI_CHK_D
+
+PI_START_A  
+            CMP.B   	#0,D5           ;are there address registers in this byte?
+            BEQ     	PI_DONE         ;no, finish
+            CLR         D2              ;Clear D2 counter
+PI_CHK_A     
+            CMP     	#8,D2           ;have we read the whole byte? 
+            BEQ         PI_DONE         ;Finished 
+            LSR.B   	#1,D5           ;shift first bit out (Starts at A0)
+            BCS     	PI_LOOP_A       ;if set, print the register #  
+            ADDI.B  	#1,D2           ;not set...increment counter, read next bit
+            BRA         PI_CHK_A           
+PI_LOOP_A
+            MOVE.B  	#'A',(A2)+      
+            CLR         D4
+            MOVE.B  	D2,D4           ;copy counter
+            MULU    	#8,D4           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D4)         ;get register number and print it
+            MOVE.B  	#'/',(A2)+      
+            ADDI.B  	#1,D2           ;increment counter
+            BRA         PI_CHK_A
+PI_DONE
+            MOVE.B  	#' ',-(A2)      ; Overwrite last '/'
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
+
 *------Used for Direction bit on OR,SUB,AND,ADD--------------
 DIRECTION
             MOVE.W      D6,D5
