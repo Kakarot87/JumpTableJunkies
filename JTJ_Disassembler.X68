@@ -1859,7 +1859,6 @@ EA_DN
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 DN_EA
-
             JSR         SOURCEDATAREG
             JSR         EA_5_0          ;determine addressing mode & source and print
             JSR         PRINT           ;print the buffer
@@ -1872,11 +1871,11 @@ EA_11_9_5                   ;bit 5 set means register source, unset means immedi
             RTS
 
 *------------------To isolate source mode------------------------
-EA_5_0  ;determine source number & mode and print
+EA_5_0      ;determine source number & mode and print
             JSR     BIT3_5           *Store source mode bits into D5
             LEA     ADDRESSTABLE, A4 *Load jump-table
-            MULU    #8,D5
-            JSR     (A4,D5)           
+            MULU    #8,D5            *Jump with offset
+            JSR     (A4,D5)          *Jump with offset
             RTS 
 *------------------BIT3_5---------------------------------------      
 BIT3_5
@@ -1887,35 +1886,37 @@ BIT3_5
             LSR.W   #7,D5    *After this line, D5 contains Source mode
             RTS
 *------------------BIT0_2---------------------------------------------
-BIT0_2
+BIT0_2      *Sub-routine for isolating destination register bits
             MOVE.W  D6,D5       
-            LSL.W   #8,D5    *Shift all bits except last 3 out 
+            LSL.W   #8,D5    
             LSL.W   #5,D5                   
             LSR.W   #8,D5
             LSR.W   #5,D5
             RTS       
 EA_11_6 ;determine destination number & mode and print
-EA_11_9 ;determine destination number and print
-            JSR     BIT9_11
-            LEA     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR     (A4,D5)
+*------------------------------------------------------------------------- 
+EA_11_9     ;determine destination number and print
+            JSR     BIT9_11           *Isolate bits
+            LEA     Table0_7_8_F,A4   *Load Table before jumping
+            MULU    #8,D5             *Acquire offset
+            JSR     (A4,D5)           *Jump with offset
             RTS   
-
-BIT6_8  *Destination Mode
+*------------------------------------------------------------------------- 
+BIT6_8  *Sub-routine for determining destination Mode
             MOVE.W D6,D5  *Isolate bits 6-8
             LSL.W #7,D5
             LSR.W #8,D5
             LSR.W #5,D5
             RTS
-BIT9_11 *Destination Register
+*------------------------------------------------------------------------- 
+BIT9_11 *Sub-routine for determining destination Register
             MOVE.W D6,D5   *Isolate bits 9-11
             LSL.W #4,D5
             LSR.W #8,D5
             LSR.W #5,D5
             RTS
-*------------------------BIT5-----------------------------------------------------------
-BIT5 *Used to acquire if source of LS/AS/RO is immediate or register
+*------------------------BIT5------------------------------------------------
+BIT5    *Sub-routine used to acquire if source of LS/AS/RO is immediate or register
             MOVE.B   D6,D5
             LSL.W    #5,D5     *Shift bit 5 to MSB
             LSL.W    #5,D5
@@ -1925,6 +1926,7 @@ BIT5 *Used to acquire if source of LS/AS/RO is immediate or register
             BEQ      SHIFTIMMEDIATE
             CMP.B    #%1,D5    *Check if shift amount is from data register
             BEQ      SHIFTFROMDN
+*------------------------------------------------------------------------- 
 SHIFTIMMEDIATE
             MOVE.B   #'#',(A2)+      *Immediate data
             JSR      BIT9_11         *Figure out shift immediate number
@@ -1933,19 +1935,19 @@ SHIFTIMMEDIATE
             Lea      Table0_7_8_F,A4 *Number isn't 8, use jump table to figure out shift ammount
             MULU     #8,D5
             JSR      (A4,D5)           
-            RTS
-            
-SHIFT8  *Specifal case for shifting #8
+            RTS          
+*-------------------------------------------------------------------------             
+SHIFT8         *Specifal case for shifting #8
             MOVE.B #'8',(A2)+
             RTS     *Return to shift opcode
-            
-SHIFTFROMDN *Shifting from  a number in a data register
+*-------------------------------------------------------------------------            
+SHIFTFROMDN       *Sub-routine for shifting from  a number in a data register
             MOVE.B   #'D',(A2)+
-            JSR      BIT9_11       *Isolate bits 
-            Lea      Table0_7_8_F,A4 *Number isn't 8, use jump table to figure out shift ammount
+            JSR      BIT9_11            *Isolate bits 
+            Lea      Table0_7_8_F,A4    *Number isn't 8, use jump table to figure out shift ammount
             MULU     #8,D5
             JSR      (A4,D5)           
-            RTS           
+            RTS            
 *---------Subroutine for figuring out Move destination---------------------
 MOVEDEST *To figure out destination of MOVE
             MOVE.B   #',',(A2)+  *Comma between source/dest
@@ -1963,52 +1965,53 @@ MOVEDEST *To figure out destination of MOVE
             CMP.W    #%111,D5   *Check if immediate/absolute
             BEQ      MOVEDEST111
             RTS
-MOVEDEST000 *Move destination is a data register
-            MOVE.B  #'D',(A2)+
-            JSR     BIT9_11
-            Lea     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR    (A4,D5)
+*------------------------------------------------------------------------- 
+MOVEDEST000         *Move destination is a data register
+            MOVE.B  #'D',(A2)+        *Move "D" for printing
+            JSR     BIT9_11           *Isolate bits of register number
+            Lea     Table0_7_8_F,A4   *Load jump-table
+            MULU    #8,D5             *Acquire offset
+            JSR    (A4,D5)            *Jump with offset
             RTS
-            
-MOVEDEST001 *Move destination is an address register
-            MOVE.B  #'A',(A2)+
-            JSR     BIT9_11
-            Lea     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR    (A4,D5)
-            RTS
+*-------------------------------------------------------------------------             
+MOVEDEST001         *Move destination is an address register
+            MOVE.B  #'A',(A2)+        *Move "A" for printing
+            JSR     BIT9_11           *Isolate bits of register number
+            Lea     Table0_7_8_F,A4   *Load jump-table
+            MULU    #8,D5             *Acquire offset
+            JSR    (A4,D5)            *Jump with offset
 
+*------------------------------------------------------------------------- 
 MOVEDEST010 *Move destinataion is indirect
-            MOVE.B  #'(',(A2)+  
-            MOVE.B  #'A',(A2)+ 
-            JSR     BIT9_11
-            Lea     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR     (A4,D5)
-            MOVE.B   #')',(A2)+
+            MOVE.B  #'(',(A2)+        *Move "(" for indirect
+            MOVE.B  #'A',(A2)+        *Move "A" for printing
+            JSR     BIT9_11           *Isolate bits of register number
+            Lea     Table0_7_8_F,A4   *Load jump-table
+            MULU    #8,D5             *Acquire offset
+            JSR     (A4,D5)           *Jump with offset
+            MOVE.B   #')',(A2)+       *Print ending paranthesis
             RTS
-            
+*-------------------------------------------------------------------------            
 MOVEDEST011 *Move destination is adress post-inc
-            MOVE.B  #'(',(A2)+  
-            MOVE.B  #'A',(A2)+ 
-            JSR     BIT9_11
-            Lea     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR     (A4,D5)
-            MOVE.B  #')',(A2)+
-            MOVE.B  #'+',(A2)+
+            MOVE.B  #'(',(A2)+         *Move "(" for printing
+            MOVE.B  #'A',(A2)+         *Move "A" for printing
+            JSR     BIT9_11            *Isolate bits of register number
+            Lea     Table0_7_8_F,A4    *Load jump-table
+            MULU    #8,D5              *Acquire offset
+            JSR     (A4,D5)            *Jump with offset
+            MOVE.B  #')',(A2)+         *Print ending paranthesis
+            MOVE.B  #'+',(A2)+         *Print "+"
             RTS
-
+*------------------------------------------------------------------------- 
 MOVEDEST100 *Move destination is address pre-dec
-            MOVE.B  #'-',(A2)+
-            MOVE.B  #'(',(A2)+  
-            MOVE.B  #'A',(A2)+ 
-            JSR     BIT9_11
-            Lea     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR     (A4,D5)
-            MOVE.B  #')',(A2)+
+            MOVE.B  #'-',(A2)+          *Print "-"
+            MOVE.B  #'(',(A2)+          *Move "(" for printing
+            MOVE.B  #'A',(A2)+          *Move "A" for printing
+            JSR     BIT9_11             *Isolate bits of register number
+            Lea     Table0_7_8_F,A4     *Load jump-table
+            MULU    #8,D5               *Acquire offset
+            JSR     (A4,D5)             *Jump with offset
+            MOVE.B  #')',(A2)+          *Print ending paranthesis
             RTS
 MOVEDEST111 *Move destination is absolute
             MOVE.B  #'$',(A2)+      *Destination is absolute address
@@ -2018,12 +2021,14 @@ MOVEDEST111 *Move destination is absolute
             CMP.B   #0,D5           *Compare with long
             BEQ     MVDSTLNG        *Destination is a long address
             RTS  
-MVDSTLNG
-            JSR     IMEDWORD 
-            JSR     IMEDWORD 
+*-------------------------------------------------------------------------   
+MVDSTLNG    *Sub-routine for printing longs
+            JSR     IMEDWORD        *Print first 4 characters
+            JSR     IMEDWORD        *Print last 4 characters
             RTS
-MVDSTWRD      
-            JSR     IMEDWORD 
+*------------------------------------------------------------------------- 
+MVDSTWRD     *Sub-routine for printing words
+            JSR     IMEDWORD        *Print 4 characters
             RTS
 *--------------------------------------------------------------------------------------
 DISPLACEMENT ;special case for BRA instructions
@@ -2198,29 +2203,31 @@ EA_DATA ;special case for MOVEQ instruction to determine data
             RTS
 
 *--------------------------------------------------------------------------------------
-DESTDATAREG *For instructions with data-register only destinations (DIVU,MULU)
-            MOVE.B  #',',(A2)+
-            MOVE.B  #'D',(A2)+
-            JSR     BIT9_11
-            LEA     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR     (A4,D5)
-            RTS   
-DESTADDREG *For instructions with address-only destinations (MOVEA)
-            MOVE.B  #'A',(A2)+
-            JSR     BIT9_11
-            LEA     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR     (A4,D5)
-            RTS   
-SOURCEDATAREG       *Used mainly for shift instructions
-            MOVE.B  #'D',(A2)+
-            JSR     BIT0_2
-            LEA     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR     (A4,D5)
-            MOVE.B  #',',(A2)+
-            RTS                
+DESTDATAREG    *Sub-routine for instructions with data-register only destinations 
+            MOVE.B  #',',(A2)+       *Print comma between source/destination
+            MOVE.B  #'D',(A2)+       *Print "D"
+            JSR     BIT9_11          *Figure out data register number
+            LEA     Table0_7_8_F,A4  *Load jump-table
+            MULU    #8,D5            *Acquire offset
+            JSR     (A4,D5)          *Jump with offset
+            RTS 
+*--------------------------------------------------------------------------------------   
+DESTADDREG     *Sub-routine for instructions with address-only destinations 
+            MOVE.B  #'A',(A2)+       *Print "A"  
+            JSR     BIT9_11          *Figure out address register number 
+            LEA     Table0_7_8_F,A4  *Load jump-table
+            MULU    #8,D5            *Acquire offset
+            JSR     (A4,D5)          *Jump with offset
+            RTS
+*--------------------------------------------------------------------------------------    
+SOURCEDATAREG 	*Sub-routine used mainly for shift instructions
+            MOVE.B  #'D',(A2)+       *Print "D"
+            JSR     BIT0_2           *Acquire data register number
+            LEA     Table0_7_8_F,A4  *Load jump table
+            MULU    #8,D5            *Acquire offset
+            JSR     (A4,D5)          *Jump with offset
+            MOVE.B  #',',(A2)+       *Print comma before finding destination
+            RTS               
             
 *------------------------Addressing Mode Jump Table-------------------------------------
 ADDRESSTABLE JSR     dataReg    *data register
@@ -2239,8 +2246,9 @@ ADDRESSTABLE JSR     dataReg    *data register
              RTS             
              JSR     DATA  *Immediate/Absolute addressing
              RTS  
-*------------------------num5 num 6 were undefined geoff-------------------------------------
-num5         MOVE.B #'W',(A2)+
+*------------------------Invalid Addressing Mode--------------------------------------
+num5        *Represents address with displacement, which we are not rquired to decode
+             MOVE.B #'W',(A2)+
              MOVE.B #'H',(A2)+
              MOVE.B #'A',(A2)+
              MOVE.B #'T',(A2)+
@@ -2252,8 +2260,9 @@ num5         MOVE.B #'W',(A2)+
              MOVE.B #'S',(A2)+
              MOVE.B #'?',(A2)+
              RTS     
-             
-num6         MOVE.B #'W',(A2)+
+*------------------------Invalid Addressing Mode--------------------------------------             
+num6        *Represents address with index, which we are not rquired to decode
+             MOVE.B #'W',(A2)+
              MOVE.B #'H',(A2)+
              MOVE.B #'A',(A2)+
              MOVE.B #'T',(A2)+
@@ -2265,74 +2274,63 @@ num6         MOVE.B #'W',(A2)+
              MOVE.B #'S',(A2)+
              MOVE.B #'?',(A2)+
              RTS     
-             
-             
+                     
 *----------------------Source is a data register----------------------------------------          
 dataReg 
-            MOVE.B  #'D',(A2)+
-            JSR     BIT0_2       
-            
-       *-------Figure out number of register---------*
-            Lea     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR     (A4,D5)
+            MOVE.B  #'D',(A2)+      *For printing "D"
+            JSR     BIT0_2          *For figuring out register number
+            Lea     Table0_7_8_F,A4 *Load jump-table
+            MULU    #8,D5           *Acquire offset
+            JSR     (A4,D5)         *Jump with offset
             RTS
 *----------------------Source is an address register------------------------------------ 
 addressReg
-            MOVE.B  #'A',(A2)+
-            JSR     BIT0_2       
-            
-       *-------Figure out number of register---------*
-            Lea     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR     (A4,D5)
-            RTS
+            MOVE.B  #'A',(A2)+      *For printing "A"
+            JSR     BIT0_2          *For figuring out register number            
+            Lea     Table0_7_8_F,A4 *Load jump-table
+            MULU    #8,D5           *Acquire offset
+            JSR     (A4,D5)         *Jump with offset
+            RTS  
 *----------------------Source is Indirect----------------------------------------------      
-address *Indirect
-            MOVE.B #'(',(A2)+
-            MOVE.B #'A',(A2)+
-            JSR     BIT0_2 *Isolate bits 0-2
-            Lea     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR     (A4,D5)
-            MOVE.B  #')',(A2)+
-            RTS
-
-            
+address 
+            MOVE.B #'(',(A2)+       *For printing "("   
+            MOVE.B #'A',(A2)+       *For printing "A"
+            JSR     BIT0_2          *Isolate bits 0-2
+            Lea     Table0_7_8_F,A4 *Load jump-table
+            MULU    #8,D5           *Acquire offset
+            JSR     (A4,D5)         *Jump with offset
+            MOVE.B  #')',(A2)+      *For printing ")"
+            RTS            
 *----------------------Source is address post-inc---------------------------------------      
 addPostInc  
-            MOVE.B  #'(',(A2)+
-            MOVE.B  #'A',(A2)+
-            JSR     BIT0_2 *Isolate bits 0-2
-            Lea     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR     (A4,D5)
-            MOVE.B  #')',(A2)+
-            MOVE.B  #'+',(A2)+
+            MOVE.B  #'(',(A2)+      *For printing "("
+            MOVE.B  #'A',(A2)+      *For printing "A"
+            JSR     BIT0_2          *Isolate bits 0-2   
+            Lea     Table0_7_8_F,A4 *Load jump-table
+            MULU    #8,D5           *Acquire offset
+            JSR     (A4,D5)         *Jump with offset
+            MOVE.B  #')',(A2)+      *For printing ")"
+            MOVE.B  #'+',(A2)+      *For printing "+"
             RTS
 *----------------------Source is address pre-dec----------------------------------------      
 addPreDec  
-            MOVE.B  #'-',(A2)+
-            MOVE.B  #'(',(A2)+
-            MOVE.B  #'A',(A2)+
-            JSR     BIT0_2 *Isolate bits 0-2
-            Lea     Table0_7_8_F,A4
-            MULU    #8,D5
-            JSR     (A4,D5)
-            MOVE.B  #')',(A2)+
+            MOVE.B  #'-',(A2)+      *For printing "-"
+            MOVE.B  #'(',(A2)+      *For printing "("
+            MOVE.B  #'A',(A2)+      *For printing "A"
+            JSR     BIT0_2          *Isolate bits 0-2
+            Lea     Table0_7_8_F,A4 *Load jump-table
+            MULU    #8,D5           *Acquire offset
+            JSR     (A4,D5)         *Jump with offset
+            MOVE.B  #')',(A2)+      *Print ending paranthesis
             RTS
 *----------------------Source is immediate or absolute data------------------------------    
 Data
-            MOVE.B  D6,D5
-            LSL.B   #2,D5
-            LSL.B   #3,D5
-            LSR.B   #2,D5
-            LSR.B   #3,D5
-            CMPI.B  #%001,D5   *Checking if absolute long
+            JSR     BIT0_2          *For acquiring size of data     
+            CMPI.B  #%001,D5        *Checking if absolute long
             BEQ     ABSLONG
-            CMPI.B  #%000,D5   *Checking if absolute word
+            CMPI.B  #%000,D5        *Checking if absolute word
             BEQ     ABSWORD
-            CMPI.B  #%100,D5   *Checking for immediate data
+            CMPI.B  #%100,D5        *Checking for immediate data
             BEQ     IMMEDIATE
             RTS
 *----------------------Immediate data---------------------------------------------------                       
@@ -2346,36 +2344,38 @@ IMMEDIATE
             CMP.B   #8, D4     
             BEQ     IMEDLONG   *Check if long data
             RTS
-*--------------------------------Shifts------------------------------------------------
-WORDSHIFT1
+*--------------------------------------------------------------------------------------- 
+WORDSHIFT1     *Sub-routine for isolating the bits of the first character of a word
             LSR.W   #6,D2
             LSR.W   #6,D2
             RTS
-WORDSHIFT2
+*--------------------------------------------------------------------------------------- 
+WORDSHIFT2     *Sub-routine for isolating the bits of the second character of a word
             LSL.W   #4,D2
             LSR.W   #6,D2
             LSR.W   #6,D2
             RTS
-
-WORDSHIFT3
+*--------------------------------------------------------------------------------------- 
+WORDSHIFT3      *Sub-routine for isolating the bits of the third character  of a word
             LSL.W   #8,D2
             LSR.W   #6,D2
             LSR.W   #6,D2
             RTS
-WORDSHIFT4
+*--------------------------------------------------------------------------------------- 
+WORDSHIFT4      *Sub-routine for isolating the bits of the fourth character of a word
             LSL.W   #7,D2
             LSL.W   #5,D2
             LSR.W   #6,D2
             LSR.W   #6,D2
             RTS
-
-BYTESHIFT1
+*--------------------------------------------------------------------------------------- 
+BYTESHIFT1      *Sub-routine for isolating the bits of the first character of a byte
             LSL.W   #8,D2
             LSR.W   #6,D2
             LSR.W   #6,D2
             RTS
-
-BYTESHIFT2
+*--------------------------------------------------------------------------------------- 
+BYTESHIFT2      *Sub-routine for isolating the bits of the second character of a byte
             LSL.W   #6,D2
             LSL.W   #6,D2
             LSR.W   #6,D2
@@ -2384,14 +2384,14 @@ BYTESHIFT2
 *---------------------------------Immediate Byte----------------------------------------
 IMEDBYTE  
             MOVE.W  (A6)+,D3         *Assuming (A6)  holds current instruction
-            MOVE.W  D3,D2
-            JSR     BYTESHIFT1
-            LEA     Table0_7_8_F,A4
-            MULU.W  #8,D2
+            MOVE.W  D3,D2            *Move to D2 to get shifted 
+            JSR     BYTESHIFT1       *Shift bits of first character
+            LEA     Table0_7_8_F,A4  *Load jump-table
+            MULU.W  #8,D2            *Acquire offset
             JSR     (A4,D2)          *Convert current value from memory to hex
-            MOVE.W  D3,D2
-            JSR     BYTESHIFT2
-            LEA     Table0_7_8_F,A4
+            MOVE.W  D3,D2            *Move to D2 to get shifted 
+            JSR     BYTESHIFT2       *Shift bits of second character
+            LEA     Table0_7_8_F,A4  *Load jump-table
             MULU.W  #8,D2            *For offset
             JSR     (A4,D2)          *Convert current value from memory to hex
             RTS
@@ -2399,27 +2399,27 @@ IMEDBYTE
 *---------------------------------Immediate Word-----------------------------------------           
 IMEDWORD  *Converts 4 characters to hex
             MOVE.W  (A6)+,D3        *Assuming (A6)  holds current instruction
-            MOVE.W  D3,D2
+            MOVE.W  D3,D2           *Move to D2 to get shifted
             JSR     WORDSHIFT1      *Shift first character
             LEA     Table0_7_8_F,A4 *Load table
-            MULU.W  #8,D2
+            MULU.W  #8,D2           *Acquire offset
             JSR     (A4,D2)         *Convert current value from memory to hex
-            MOVE.W  D3,D2
-            JSR     WORDSHIFT2       *Shift second character
+            MOVE.W  D3,D2           *Move to D2 to get shifted
+            JSR     WORDSHIFT2      *Shift second character
             LEA     Table0_7_8_F,A4 *Load table
-            MULU.W  #8,D2
+            MULU.W  #8,D2           *Acquire offset
             JSR     (A4,D2)         *Convert current value from memory to hex
-            MOVE.W  D3,D2
+            MOVE.W  D3,D2           *Move to D2 to get shifted on
             JSR     WORDSHIFT3      *Shift third character
             LEA     Table0_7_8_F,A4 *Load table
-            MULU.W  #8,D2
+            MULU.W  #8,D2           *Acquire offset
             JSR     (A4,D2)         *Convert current value from memory to hex
-            MOVE.W  D3,D2
+            MOVE.W  D3,D2           *Move to D2 to get shifted on
             JSR     WORDSHIFT4      *Shift fourth character
-            LEA     Table0_7_8_F,A4  
+            LEA     Table0_7_8_F,A4 *Load jump-table 
             MULU.W  #8,D2           *For offset
             JSR     (A4,D2)         *Convert current value from memory to hex
-            RTS  
+            RTS 
 *---------------------------------Immediate Long----------------------------------------       
 IMEDLONG
             JSR IMEDWORD *First 4 characters
@@ -2437,7 +2437,7 @@ ABSWORD
             JSR IMEDWORD  *Convert 4 characters to hex
             RTS 
                             
-*-----------------------Hex/Register numbers0-----------------------------------------
+*-----------------------Hex/Register numbers-----------------------------------------
 Table0_7_8_F JSR     Reg0   *register 0
              RTS           
              JSR     Reg1   *register 1
