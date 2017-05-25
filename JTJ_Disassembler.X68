@@ -1995,17 +1995,15 @@ MOVEDEST111 *Move destination is absolute
             MOVE.B  #'$',(A2)+      *Destination is absolute address
             JSR     BIT9_11         *Isolate bits 9-11 to figure out size 
             CMP.B   #%001,D5        *Compare with word
-            BEQ     MVDSTLNG        *Destination is a word address  
+            BEQ     MVDSTWRD        *Destination is a word address  
             CMP.B   #0,D5           *Compare with long
-            BEQ     MVDSTWRD        *Destination is a long address
+            BEQ     MVDSTLNG       *Destination is a long address
             RTS  
 MVDSTLNG
-            MOVE.B  #'$',(A2)+
             JSR     IMEDWORD 
             JSR     IMEDWORD 
             RTS
 MVDSTWRD      
-            MOVE.B  #'$',(A2)+
             JSR     IMEDWORD 
             RTS
 *--------------------------------------------------------------------------------------
