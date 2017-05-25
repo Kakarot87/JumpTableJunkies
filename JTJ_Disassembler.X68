@@ -996,7 +996,7 @@ _LSLB
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LSLW
@@ -1011,7 +1011,7 @@ _LSLW
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LSLL
@@ -1026,7 +1026,7 @@ _LSLL
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LSRB
@@ -1041,7 +1041,7 @@ _LSRB
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LSRW
@@ -1056,7 +1056,7 @@ _LSRW
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LSRL
@@ -1071,7 +1071,7 @@ _LSRL
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ASLB
@@ -1086,7 +1086,7 @@ _ASLB
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ASLW
@@ -1100,8 +1100,8 @@ _ASLW
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         BIT5		;figure out if source is immediate/data
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ASLL
@@ -1116,7 +1116,7 @@ _ASLL
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ASRB
@@ -1131,7 +1131,7 @@ _ASRB
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ASRW
@@ -1146,7 +1146,7 @@ _ASRW
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ASRL
@@ -1161,7 +1161,7 @@ _ASRL
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ROLB
@@ -1176,7 +1176,7 @@ _ROLB
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ROLW
@@ -1191,7 +1191,7 @@ _ROLW
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ROLL
@@ -1206,7 +1206,7 @@ _ROLL
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _RORB
@@ -1221,7 +1221,7 @@ _RORB
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _RORW
@@ -1236,7 +1236,7 @@ _RORW
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _RORL
@@ -1251,7 +1251,7 @@ _RORL
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             JSR         BIT5
-            JSR         DESTDATAREG
+            JSR         SOURCEDATAREG   ;Figure out data register number
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 
@@ -2221,14 +2221,13 @@ DESTADDREG     *Sub-routine for instructions with address-only destinations
             RTS
 *--------------------------------------------------------------------------------------    
 SOURCEDATAREG 	*Sub-routine used mainly for shift instructions
+            MOVE.B  #',',(A2)+       *Print comma before finding destination
             MOVE.B  #'D',(A2)+       *Print "D"
             JSR     BIT0_2           *Acquire data register number
             LEA     Table0_7_8_F,A4  *Load jump table
             MULU    #8,D5            *Acquire offset
-            JSR     (A4,D5)          *Jump with offset
-            MOVE.B  #',',(A2)+       *Print comma before finding destination
-            RTS               
-            
+            JSR     (A4,D5)          *Jump with offset    
+            RTS           
 *------------------------Addressing Mode Jump Table-------------------------------------
 ADDRESSTABLE JSR     dataReg    *data register
              RTS             
