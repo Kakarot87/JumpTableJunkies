@@ -1834,14 +1834,12 @@ DIRECTION
             BEQ         DN_EA           ; Dn TO <ea>
 EA_DN
             JSR         EA_5_0          ;determine addressing mode & source and print
-            MOVE.B      #',',(A2)+
             JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 DN_EA
 
-            JSR         DESTDATAREG
-            MOVE.B      #',',(A2)+
+            JSR         SOURCEDATAREG
             JSR         EA_5_0          ;determine addressing mode & source and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -1992,18 +1990,23 @@ MOVEDEST100 *Move destination is address pre-dec
             MOVE.B  #')',(A2)+
             RTS
 MOVEDEST111 *Move destination is absolute
-            MOVE.B  #'$',(A2)+      *Destination is absolute address
-            JSR     BIT9_11         *Isolate bits 9-11 to figure out size 
-            CMP.B   #%001,D5        *Compare with word
-            BEQ     MVDSTWRD        *Destination is a word address  
-            CMP.B   #0,D5           *Compare with long
-            BEQ     MVDSTLNG       *Destination is a long address
-            RTS  
+            MOVE.B  D6,D5
+            LSL.B   #3,D5
+            LSL.B   #2,D5
+            LSR.B   #2,D5
+            LSR.B   #3,D5
+            CMP.B   #%100,D5
+            BEQ     MVDSTLNG
+            CMP.B   #0,D5
+            BEQ     MVDSTWRD  
+            RTS    
 MVDSTLNG
+            MOVE.B  #'$',(A2)+
             JSR     IMEDWORD 
             JSR     IMEDWORD 
             RTS
 MVDSTWRD      
+            MOVE.B  #'$',(A2)+
             JSR     IMEDWORD 
             RTS
 *--------------------------------------------------------------------------------------
@@ -2200,6 +2203,7 @@ SOURCEDATAREG       *Used mainly for shift instructions
             LEA     Table0_7_8_F,A4
             MULU    #8,D5
             JSR     (A4,D5)
+            MOVE.B  #',',(A2)+
             RTS                
             
 *------------------------Addressing Mode Jump Table-------------------------------------
