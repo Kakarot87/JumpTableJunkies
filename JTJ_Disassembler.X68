@@ -1999,7 +1999,7 @@ ADDRESSTABLE JSR     dataReg    *data register
              RTS             
              JSR     num6       *If number is somehow 6
              RTS             
-             JSR     Immediate  *Immediate/Absolute addressing
+             JSR     DATA  *Immediate/Absolute addressing
              RTS  
 *------------------------num5 num 6 were undefined geoff-------------------------------------
 num5         MOVE.B #'W',(A2)+
