@@ -1338,9 +1338,9 @@ _ADDQB
             MOVE.B      #'Q',(A2)+
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
-            MOVE.B      #' ',(A2)+
-            MOVE.B      #' ',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
             JSR         SHIFTIMMEDIATE
             MOVE.B      #',',(A2)+
             JSR         EA_5_0          ;determine addressing mode & source and print
@@ -1356,6 +1356,8 @@ _ADDQW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
             JSR         SHIFTIMMEDIATE
             MOVE.B      #',',(A2)+
             JSR         EA_5_0          ;determine addressing mode & source and print
@@ -1371,6 +1373,8 @@ _ADDQL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
             JSR         SHIFTIMMEDIATE
             MOVE.B      #',',(A2)+
             JSR         EA_5_0          ;determine addressing mode & source and print
@@ -1421,6 +1425,9 @@ _CMPB
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
             JSR         EA_5_0          ;determine addressing mode & source and print
 
             JSR         DESTDATAREG
@@ -1434,6 +1441,9 @@ _CMPW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
             JSR         EA_5_0          ;determine addressing mode & source and print
 
             JSR         DESTDATAREG
@@ -1446,10 +1456,10 @@ _CMPL
             MOVE.B      #'P',(A2)+
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
-            MOVE.B      #' ',(A2)+
-            MOVE.B      #' ',(A2)+
-            MOVE.B      #' ',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
             JSR         EA_5_0          ;determine addressing mode & source and print
 
             JSR         DESTDATAREG
