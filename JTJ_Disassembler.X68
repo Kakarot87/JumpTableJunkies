@@ -993,10 +993,8 @@ _LSLB
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LSLW
@@ -1010,10 +1008,8 @@ _LSLW
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LSLL
@@ -1027,10 +1023,8 @@ _LSLL
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LSRB
@@ -1044,10 +1038,8 @@ _LSRB
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LSRW
@@ -1061,10 +1053,8 @@ _LSRW
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LSRL
@@ -1078,10 +1068,8 @@ _LSRL
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ASLB
@@ -1095,10 +1083,8 @@ _ASLB
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ASLW
@@ -1112,10 +1098,8 @@ _ASLW
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ASLL
@@ -1129,10 +1113,8 @@ _ASLL
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ASRB
@@ -1146,10 +1128,8 @@ _ASRB
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ASRW
@@ -1163,10 +1143,8 @@ _ASRW
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ASRL
@@ -1180,10 +1158,8 @@ _ASRL
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ROLB
@@ -1197,10 +1173,8 @@ _ROLB
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ROLW
@@ -1214,10 +1188,8 @@ _ROLW
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ROLL
@@ -1231,10 +1203,8 @@ _ROLL
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _RORB
@@ -1248,10 +1218,8 @@ _RORB
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _RORW
@@ -1265,10 +1233,8 @@ _RORW
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _RORL
@@ -1282,10 +1248,8 @@ _RORL
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
             MOVE.B      #' ',(A2)+
-            *JSR         EA_2_0          ;determine destination data register numer print (always Data reg)
-            *JSR         EA_11_9_5       ;bit 5 set means register source, unset means immediate data 
             JSR         BIT5
-            JSR         SOURCEDATAREG
+            JSR         DESTDATAREG
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 
@@ -1866,7 +1830,7 @@ DIRECTION
             LSR.W       #7,D5
             LSR.W       #8,D5           ;D5 NOW HAS DIRECTION BIT
             CMP.B       #1,D5
-            BNE         DN_EA           ; Dn TO <ea>
+            BEQ         DN_EA           ; Dn TO <ea>
 EA_DN
             JSR         EA_5_0          ;determine addressing mode & source and print
             JSR         DESTDATAREG
