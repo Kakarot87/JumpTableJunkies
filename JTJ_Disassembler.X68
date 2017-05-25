@@ -664,6 +664,8 @@ _MOVEW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         EA_5_0          ;determine source addressing mode & number and print
 
             JSR         MOVEDEST    
@@ -1461,6 +1463,9 @@ _ANDB
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ANDW
             MOVE.B      #4,D4
@@ -1470,6 +1475,9 @@ _ANDW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 
 _ANDL
@@ -1480,6 +1488,9 @@ _ANDL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ORB
             MOVE.B      #2,D4
@@ -1572,7 +1583,7 @@ _MOVEMW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            
+            MOVE.B      #' ',(A2)+ 
             JSR         BIT9_11         ;isolate data bits 9-11 into D5
             CMP.B       #%100,D5        ;register to memory
             BEQ         _MOVEMRTM
@@ -1588,7 +1599,7 @@ _MOVEML
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            
+            MOVE.B      #' ',(A2)+ 
             JSR         BIT9_11         ;isolate data bits 9-11 into D5
             CMP.B       #%100,D5        ;register to memory
             BEQ         _MOVEMRTM
@@ -1604,6 +1615,7 @@ _MOVEQL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
             JSR         EA_DATA         ;determine data
             JSR         EA_11_9         ;determine destination number and print (Always Data Register)
             
