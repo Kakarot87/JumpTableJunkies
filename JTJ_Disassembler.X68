@@ -1777,19 +1777,156 @@ MVDSTWRD
             RTS
 *--------------------------------------------------------------------------------------
 DISPLACEMENT ;special case for BRA instructions
-            CLR D5
-            MOVE.B D6,D5
-            CMP.B #$FF,D5
-            BEQ LONGDISP
-            CMP.B #0,D5
-            BEQ WORDISP
-            RTS
-LONGDISP
-WORDISP
-            CLR D5
-            MOVE.B #4,D4 *Word
-            MOVE.W (A6)+,D5 *Assuming A6 has current instruction
+            CLR         D5                      * clear D5  
+            CLR         D2                      * clear D2
+            CLR         D1                      * clear D1
+            CLR         D0                      * clear D0
             
+            MOVE.B      #'$',(A2)+              * input $ into A2 and incrament
+            MOVE.B      D6,D5                   * move D6 to D5
+            CMP.B       #$FF,D5                 * compare if D5 is equal to FF
+            BEQ         LONGDISP                * branch to LONGDISP if equal
+            CMP.B       #0,D5                   * compare if D5 is equal to 00
+            BEQ         WORDISP                 * branch to WORDISP if equal
+            NEG.B       D5                      * 2s compliment D5
+            MOVE.L      A6,D0                   * move A6 to D0
+            SUB.B       D5,D0                   * subtract D5 form D0
+            
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+
+* Case for displacement being 32 bits or 8 bytes -----------------------------
+LONGDISP
+            MOVEA.L     A6,A5                           * move A6 into A5
+            ADD.L       #2,A5                           * add 2 to A5
+            MOVE.L      (A5),D1                         * move content in inside the address A5 into D1
+            
+            CMP.L       #$7FFFFFFF,D1                   * compare if D1 is less than 7FFFFFFF
+            BLT         DISPLACE_POSITIVE               * branch to DISPLAY_POSITIVE
+            BRA         DISPLACE_NEGATIVE               * branch to DISPLAY_NEGATIVE
+
+* Case for displacement being only 16 bits or 4 bytes ------------------------
+WORDISP
+            MOVEA.L     A6,A5                           * move A6 into A5
+            MOVE.W      (A5),D1                         * move content in inside the address A5 into D1
+            
+            CMPI.L      #$7FFF,D1                       * compare if D1 is less than 7FFF
+            BLT         DISPLACE_POSITIVE               * branch to DISPLAY_POSITIVE
+            BRA         DISPLACE_NEGATIVE               * branch to DISPLAY_NEGATIVE
+
+* Used for positive displacement or displacement that adds to the existing address -----------
+DISPLACE_POSITIVE
+            MOVE.L      A6,D0                           * move A6 into D0
+            ADD.L       D1,D0                           * add D1 to D0
+            CLR         D2                              * clear D2
+            BRA         INSERT_DISPLACEMENT             * branch to INSERT_DISPACEMENT
+            
+* Used for negative displacement or displacement that subtracts from the existing address ----
+DISPLACE_NEGATIVE
+            MOVE.L      A6,D0                           * move A6 into D0
+            NEG.W       D1                              * 2s compliment D1
+            SUB.L       D1,D0                           * subtract D1 from D0
+            CLR         D2                              * clear D2       
+            BRA         INSERT_DISPLACEMENT             * branch to INSERT_DISPACEMENT
+
+* Used after displacement is complete -------------------------------------------------------
+DISPLACEMENT_DONE
+            RTS                                     * return to subroutine
+
+* Inputs the characters of the address that the displacement is done to ---------------------
+INSERT_DISPLACEMENT
+            CLR         D1                          * clear D1
+            ADDI.B      #1,D2                       * add 1 to register D2
+            CMPI.B      #9,D2                       * compare if the value in D2 is equal to 9
+            BEQ         DISPLACEMENT_DONE           * branch to DISPLACEMENT_DONE if equal
+            
+            ROL.L       #4,D0                       * rotate left 4 bits to D0
+            MOVE.B      D0,D1                       * move a byte from D0 to D1 
+            LSL.B       #4,D1                       * shift 4 bits left in data register 1
+            LSR.B       #4,D1                       * shift 4 bits right in data register 1
+            
+            CMPI.B      #0,D1                       * compare if D1 is 0
+            BEQ         ADD_0                       * branch to ADD_0
+            CMPI.B      #1,D1                       * compare if D1 is 1
+            BEQ         ADD_1                       * branch to ADD_1
+            CMPI.B      #2,D1                       * compare if D1 is 2
+            BEQ         ADD_2                       * branch to ADD_2                       
+            CMPI.B      #3,D1                       * compare if D1 is 3
+            BEQ         ADD_3                       * branch to ADD_3               
+            CMPI.B      #4,D1                       * compare if D1 is 4
+            BEQ         ADD_4                       * branch to ADD_4
+            CMPI.B      #5,D1                       * compare if D1 is 5
+            BEQ         ADD_5                       * branch to ADD_5                   
+            CMPI.B      #6,D1                       * compare if D1 is 6
+            BEQ         ADD_6                       * branch to ADD_6
+            CMPI.B      #7,D1                       * compare if D1 is 7
+            BEQ         ADD_7                       * branch to ADD_7
+            CMPI.B      #8,D1                       * compare if D1 is 8
+            BEQ         ADD_8                       * branch to ADD_8                       
+            CMPI.B      #9,D1                       * compare if D1 is 9
+            BEQ         ADD_9                       * branch to ADD_9                      
+            CMPI.B      #$A,D1                      * compare if D1 is A
+            BEQ         ADD_A                       * branch to ADD_A
+            CMPI.B      #$B,D1                      * compare if D1 is B
+            BEQ         ADD_B                       * branch to ADD_B
+            CMPI.B      #$C,D1                      * compare if D1 is C
+            BEQ         ADD_C                       * branch to ADD_C
+            CMPI.B      #$D,D1                      * compare if D1 is D
+            BEQ         ADD_D                       * branch to ADD_D
+            CMPI.B      #$E,D1                      * compare if D1 is E
+            BEQ         ADD_E                       * branch to ADD_E
+            CMPI.B      #$F,D1                      * compare if D1 is F
+            BEQ         ADD_F                       * branch to ADD_F   
+
+            BRA         INSERT_DISPLACEMENT         * branch to INSERT_DISPLACEMENT
+
+ADD_0       * Add 0 to be printed
+            JSR         Reg0                    * jumpt to Reg0
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT          
+ADD_1       * Add 1 to be printed
+            JSR         Reg1                    * jumpt to Reg1
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_2       * Add 2 to be printed
+            JSR         Reg2                    * jumpt to Reg2
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_3       * Add 3 to be printed
+            JSR         Reg3                    * jumpt to Reg3
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_4       * Add 4 to be printed
+            JSR         Reg4                    * jumpt to Reg4
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_5       * Add 5 to be printed
+            JSR         Reg5                    * jumpt to Reg5
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_6       * Add 6 to be printed
+            JSR         Reg6                    * jumpt to Reg6
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_7       * Add 7 to be printed
+            JSR         Reg7                    * jumpt to Reg7
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_8       * Add 8 to be printed
+            JSR         HEX8                    * jumpt to Reg8
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_9       * Add 9 to be printed
+            JSR         HEX9                    * jumpt to Reg9
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_A       * Add A to be printed
+            JSR         HEXA                    * jumpt to HEXA
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_B       * Add B to be printed
+            JSR         HEXB                    * jumpt to HEXB
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT           
+ADD_C       * Add C to be printed
+            JSR         HEXC                    * jumpt to HEXC
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_D       * Add D to be printed
+            JSR         HEXD                    * jumpt to HEXD
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_E       * Add E to be printed
+            JSR         HEXE                    * jumpt to HEXE
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
+ADD_F       * Add F to be printed
+            JSR         HEXF                    * jumpt to HEXF
+            BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
             
 EA_DATA ;special case for MOVEQ instruction to determine data
 
