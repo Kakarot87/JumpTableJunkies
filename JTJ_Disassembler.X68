@@ -1407,6 +1407,7 @@ _ADDQL
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MULS
 	    JSR         VALIDSOURCEMODE *Check for valid source
+	    MOVE.B      #4,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'U',(A2)+
             MOVE.B      #'L',(A2)+
@@ -1420,6 +1421,7 @@ _MULS
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _DIVU
 	    JSR         VALIDSOURCEMODE *Check for valid source
+	    MOVE.B      #4,D4
             MOVE.B      #'D',(A2)+
             MOVE.B      #'I',(A2)+
             MOVE.B      #'V',(A2)+
