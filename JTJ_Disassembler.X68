@@ -1945,10 +1945,14 @@ EA_DN
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 DN_EA
-            JSR         SOURCEDATAREG
+            JSR         SOURCE_DN_EA
             JSR         EA_5_0          ;determine addressing mode & source and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+SOURCE_DN_EA                            ;sub-routine for printing data register source
+            MOVE.B      #'D',(A2)+      ;print "D"
+            JSR         EA_11_9		;print data register number
+            MOVE.B      #',',(A2)+      ;print comma
 *------Used for Data Register Shift (LSL,ASL,LSR,LSR,ROR,ROL)--------------
 EA_2_0                      ;determine destination data register numer print (always Data reg)
             RTS
