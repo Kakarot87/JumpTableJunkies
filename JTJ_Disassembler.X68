@@ -640,6 +640,7 @@ _RTS
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEB
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #2,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
@@ -656,6 +657,7 @@ _MOVEB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEW
+            JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #4,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
@@ -672,6 +674,7 @@ _MOVEW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #8,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
@@ -837,11 +840,13 @@ _JSR
             MOVE.B      #'R',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
-            JSR         DISPLACEMENT    ;determine  the displacement and print
+	    JSR         EA_5_0
+            *JSR         DISPLACEMENT    ;determine  the displacement and print
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 ****************************** MEMORY SHIFTS *********************************************
 _LSL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #'L',(A2)+
             MOVE.B      #'S',(A2)+
             MOVE.B      #'L',(A2)+  
@@ -851,6 +856,7 @@ _LSL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
 _LSR
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #'L',(A2)+
             MOVE.B      #'S',(A2)+
             MOVE.B      #'R',(A2)+  
@@ -860,6 +866,7 @@ _LSR
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
 _ASR
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #'A',(A2)+
             MOVE.B      #'S',(A2)+
             MOVE.B      #'R',(A2)+  
@@ -869,6 +876,7 @@ _ASR
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
 _ASL
+            JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #'A',(A2)+
             MOVE.B      #'S',(A2)+
             MOVE.B      #'L',(A2)+  
@@ -878,6 +886,7 @@ _ASL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
 _ROL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #'R',(A2)+
             MOVE.B      #'O',(A2)+
             MOVE.B      #'L',(A2)+  
@@ -887,6 +896,7 @@ _ROL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
 _ROR
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #'R',(A2)+
             MOVE.B      #'O',(A2)+
             MOVE.B      #'R',(A2)+  
@@ -897,6 +907,7 @@ _ROR
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
 *****************************************************************************************
 _CLRB
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #2,D4
             MOVE.B      #'C',(A2)+
             MOVE.B      #'L',(A2)+
@@ -908,6 +919,7 @@ _CLRB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _CLRW 
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #4,D4
             MOVE.B      #'C',(A2)+
             MOVE.B      #'L',(A2)+
@@ -922,6 +934,7 @@ _CLRW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _CLRL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #8,D4
             MOVE.B      #'C',(A2)+
             MOVE.B      #'L',(A2)+
@@ -934,6 +947,7 @@ _CLRL
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 *****************************************ADD IMMEDIATE*******************************************
 _ADDIB
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #2,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
@@ -950,6 +964,7 @@ _ADDIB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDIW
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #4,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
@@ -967,6 +982,7 @@ _ADDIW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDIL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #8,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
@@ -984,7 +1000,7 @@ _ADDIL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 **************************************IMMEDIATE AND REGISTER SHIFTS****************************************
-_LSLB
+_LSLB	    
             MOVE.B      #2,D4
             MOVE.B      #'L',(A2)+
             MOVE.B      #'S',(A2)+
@@ -1258,6 +1274,7 @@ _RORL
 **********************************************************************************************************
 
 _MOVEAB
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #2,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
@@ -1273,6 +1290,7 @@ _MOVEAB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEAW
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #4,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
@@ -1288,6 +1306,7 @@ _MOVEAW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MOVEAL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #8,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'O',(A2)+
@@ -1303,6 +1322,7 @@ _MOVEAL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDAW
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #4,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
@@ -1317,6 +1337,7 @@ _ADDAW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDAL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #8,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
@@ -1331,6 +1352,7 @@ _ADDAL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDQB
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #2,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
@@ -1348,6 +1370,7 @@ _ADDQB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDQW
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #4,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
@@ -1365,6 +1388,7 @@ _ADDQW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ADDQL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #8,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
@@ -1382,6 +1406,7 @@ _ADDQL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MULS
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #'M',(A2)+
             MOVE.B      #'U',(A2)+
             MOVE.B      #'L',(A2)+
@@ -1394,6 +1419,7 @@ _MULS
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _DIVU
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #'D',(A2)+
             MOVE.B      #'I',(A2)+
             MOVE.B      #'V',(A2)+
@@ -1406,6 +1432,7 @@ _DIVU
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _LEA
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #4,D4
             MOVE.B      #'L',(A2)+
             MOVE.B      #'E',(A2)+
@@ -1418,6 +1445,7 @@ _LEA
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _CMPB
+            JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #2,D4
             MOVE.B      #'C',(A2)+
             MOVE.B      #'M',(A2)+
@@ -1434,6 +1462,7 @@ _CMPB
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _CMPW
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #4,D4
             MOVE.B      #'C',(A2)+
             MOVE.B      #'M',(A2)+
@@ -1450,6 +1479,7 @@ _CMPW
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _CMPL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #8,D4
             MOVE.B      #'C',(A2)+
             MOVE.B      #'M',(A2)+
@@ -1466,6 +1496,7 @@ _CMPL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _ANDB
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #2,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'N',(A2)+
@@ -1478,6 +1509,7 @@ _ANDB
             MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ANDW
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #4,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'N',(A2)+
@@ -1491,6 +1523,7 @@ _ANDW
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 
 _ANDL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #8,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'N',(A2)+
@@ -1503,6 +1536,7 @@ _ANDL
             MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ORB
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #2,D4
             MOVE.B      #'O',(A2)+
             MOVE.B      #'R',(A2)+
@@ -1512,6 +1546,7 @@ _ORB
             MOVE.B      #9,(A2)+        ;tab
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ORW
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #4,D4
             MOVE.B      #'O',(A2)+
             MOVE.B      #'R',(A2)+
@@ -1521,6 +1556,7 @@ _ORW
             MOVE.B      #9,(A2)+        ;tab
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ORL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #8,D4
             MOVE.B      #'O',(A2)+
             MOVE.B      #'R',(A2)+
@@ -1530,6 +1566,7 @@ _ORL
             MOVE.B      #9,(A2)+        ;tab
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _SUBB
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #2,D4
             MOVE.B      #'S',(A2)+
             MOVE.B      #'U',(A2)+
@@ -1539,6 +1576,7 @@ _SUBB
             MOVE.B      #9,(A2)+        ;tab
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _SUBW
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #4,D4
             MOVE.B      #'S',(A2)+
             MOVE.B      #'U',(A2)+
@@ -1548,6 +1586,7 @@ _SUBW
             MOVE.B      #9,(A2)+        ;tab
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _SUBL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #8,D4
             MOVE.B      #'S',(A2)+
             MOVE.B      #'U',(A2)+
@@ -1557,6 +1596,7 @@ _SUBL
             MOVE.B      #9,(A2)+        ;tab
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ADDB
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #2,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
@@ -1566,6 +1606,7 @@ _ADDB
             MOVE.B      #9,(A2)+        ;tab
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ADDW
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #4,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
@@ -1575,6 +1616,7 @@ _ADDW
             MOVE.B      #9,(A2)+        ;tab
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ADDL
+	    JSR         VALIDSOURCEMODE *Check for valid source
             MOVE.B      #8,D4
             MOVE.B      #'A',(A2)+
             MOVE.B      #'D',(A2)+
@@ -1627,6 +1669,8 @@ _MOVEQL
             MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #' ',(A2)+ 
             JSR         EA_DATA         ;determine data
+            MOVE.B      #',',(A2)+
+            MOVE.B      #'D',(A2)+
             JSR         EA_11_9         ;determine destination number and print (Always Data Register)
             
             JSR         PRINT           ;print the buffer
@@ -2182,7 +2226,24 @@ ADD_E       * Add E to be printed
 ADD_F       * Add F to be printed
             JSR         HEXF                    * jumpt to HEXF
             BRA         INSERT_DISPLACEMENT     * branch to INSERT_DISPLACEMENT
-*--------------------------------------------------------------------------------------              
+*--------------------------------------------------------------------------------------
+VALIDSOURCEMODE  *Subroutine to make sure source Mode isn't  101, 110
+            JSR     BIT3_5       *Isolate source mode bits
+            CMPI.B  #%101, D5    *Address with displacement
+            BEQ     _DATA        *Print DATA message
+            CMPI.B  #%110, D5    *Address with index
+            BEQ     _DATA        *Print DATA message
+            CMPI.B  #%111, D5    *Immediate/absolute data 
+            BEQ     VALIDATE111
+            RTS
+VALIDATE111      *To make sure source XN isn't 010,011
+            JSR     BIT0_2       *Grab bits for source Xn
+            CMPI.B  #%010, D5    *Compare with PC displacement
+            BEQ     _DATA        *Print DATA message
+            CMPI.B  #%110, D5    *Compare with PC index
+            BEQ     _DATA        *Print DATA message
+            RTS
+*--------------------------------------------------------------------------------------   
 EA_DATA ;special case for MOVEQ instruction to determine data
             MOVE.B  #'#',(A2)+       *To signify immediate data
             MOVE.B  #'$',(A2)+       *Printing in hex
@@ -2247,32 +2308,12 @@ ADDRESSTABLE JSR     dataReg    *data register
              RTS  
 *------------------------Invalid Addressing Mode--------------------------------------
 num5        *Represents address with displacement, which we are not rquired to decode
-             MOVE.B #'W',(A2)+
-             MOVE.B #'H',(A2)+
-             MOVE.B #'A',(A2)+
-             MOVE.B #'T',(A2)+
-             MOVE.B #'`',(A2)+
-             MOVE.B #'S',(A2)+
-             MOVE.B #'T',(A2)+
-             MOVE.B #'H',(A2)+
-             MOVE.B #'I',(A2)+
-             MOVE.B #'S',(A2)+
-             MOVE.B #'?',(A2)+
+             BRA    _DATA
              RTS     
 *------------------------Invalid Addressing Mode--------------------------------------             
 num6        *Represents address with index, which we are not rquired to decode
-             MOVE.B #'W',(A2)+
-             MOVE.B #'H',(A2)+
-             MOVE.B #'A',(A2)+
-             MOVE.B #'T',(A2)+
-             MOVE.B #'`',(A2)+
-             MOVE.B #'S',(A2)+
-             MOVE.B #'T',(A2)+
-             MOVE.B #'H',(A2)+
-             MOVE.B #'I',(A2)+
-             MOVE.B #'S',(A2)+
-             MOVE.B #'?',(A2)+
-             RTS     
+             BRA    _DATA
+             RTS    
                      
 *----------------------Source is a data register----------------------------------------          
 dataReg 
