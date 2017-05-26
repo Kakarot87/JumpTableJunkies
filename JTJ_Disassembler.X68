@@ -2106,10 +2106,10 @@ MOVEDEST100 *Move destination is address pre-dec
 MOVEDEST111 *Move destination is absolute
             MOVE.B  #'$',(A2)+      *Destination is absolute address
             JSR     BIT9_11         *Isolate bits 9-11 to figure out size 
-            CMP.B   #%001,D5        *Compare with word
-            BEQ     MVDSTLNG        *Destination is a word address  
-            CMP.B   #0,D5           *Compare with long
-            BEQ     MVDSTLNG        *Destination is a long address
+            CMP.B   #%001,D5        *Compare with long
+            BEQ     MVDSTLNG        *Destination is a long address  
+            CMP.B   #0,D5           *Compare with word
+            BEQ     MVDSTWRD        *Destination is a word address
             RTS  
 *-------------------------------------------------------------------------   
 MVDSTLNG    *Sub-routine for printing longs
