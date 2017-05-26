@@ -956,6 +956,8 @@ _ADDIB
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             MOVE.B      #'#',(A2)+
             MOVE.B      #'$',(A2)+
             JSR         IMEDBYTE        ;print immediate byte
@@ -973,6 +975,8 @@ _ADDIW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             MOVE.B      #'#',(A2)+
             MOVE.B      #'$',(A2)+
             JSR         IMEDWORD        ;print immediate word
@@ -991,6 +995,8 @@ _ADDIL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             MOVE.B      #'#',(A2)+
             MOVE.B      #'$',(A2)+
             JSR         IMEDLONG        ;print immediate long
@@ -1331,6 +1337,8 @@ _ADDAW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         EA_5_0          ;determine addressing mode & source and print
 	    MOVE.B  #',',(A2)+       *Print ","
             JSR         DESTADDREG
@@ -1346,6 +1354,8 @@ _ADDAL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         EA_5_0          ;determine addressing mode & source and print
 	    MOVE.B  #',',(A2)+       *Print ","
             JSR         DESTADDREG
@@ -1406,8 +1416,8 @@ _ADDQL
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _MULS
-	    JSR         VALIDSOURCEMODE *Check for valid source
-	    MOVE.B      #4,D4
+	        JSR         VALIDSOURCEMODE *Check for valid source
+	        MOVE.B      #4,D4
             MOVE.B      #'M',(A2)+
             MOVE.B      #'U',(A2)+
             MOVE.B      #'L',(A2)+
@@ -1420,8 +1430,8 @@ _MULS
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _DIVU
-	    JSR         VALIDSOURCEMODE *Check for valid source
-	    MOVE.B      #4,D4
+	        JSR         VALIDSOURCEMODE *Check for valid source
+	        MOVE.B      #4,D4
             MOVE.B      #'D',(A2)+
             MOVE.B      #'I',(A2)+
             MOVE.B      #'V',(A2)+
@@ -1545,7 +1555,10 @@ _ORB
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ORW
 	    JSR         VALIDSOURCEMODE *Check for valid source
@@ -1555,7 +1568,10 @@ _ORW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ORL
 	    JSR         VALIDSOURCEMODE *Check for valid source
@@ -1565,7 +1581,10 @@ _ORL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
-            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _SUBB
 	    JSR         VALIDSOURCEMODE *Check for valid source
@@ -1576,6 +1595,10 @@ _SUBB
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _SUBW
 	    JSR         VALIDSOURCEMODE *Check for valid source
@@ -1586,6 +1609,10 @@ _SUBW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _SUBL
 	    JSR         VALIDSOURCEMODE *Check for valid source
@@ -1596,6 +1623,10 @@ _SUBL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ADDB
 	    JSR         VALIDSOURCEMODE *Check for valid source
@@ -1606,6 +1637,9 @@ _ADDB
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ADDW
 	    JSR         VALIDSOURCEMODE *Check for valid source
@@ -1616,6 +1650,9 @@ _ADDW
             MOVE.B      #'.',(A2)+
             MOVE.B      #'W',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _ADDL
 	    JSR         VALIDSOURCEMODE *Check for valid source
@@ -1626,6 +1663,9 @@ _ADDL
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
+            MOVE.B      #' ',(A2)+ 
             JSR         DIRECTION       ; DETERMINE DIRECTION BIT AND PRINT ACCORDINGLY, PRINT AND NEXT_CODE INSIDE SUB
 _MOVEMW
             MOVE.B      #4,D4
@@ -2589,7 +2629,7 @@ CHECK_IF_DONE
 CHECK_LINES
         LEA         numOfLines,A4       * load number of lines storage address into A4
         ADDI.B      #$1,(A4)            * add 1 to the line counter
-        CMPI.B      #$1E,(A4)           * compare if number of lines is 30
+        CMPI.B      #$1F,(A4)           * compare if number of lines is 30
         BGE         LINE_LIMIT          * branch if equal to 30
         RTS                             * return to subroutine 
 
