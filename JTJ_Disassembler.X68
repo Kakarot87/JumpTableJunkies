@@ -2070,6 +2070,7 @@ MOVEDEST001         *Move destination is an address register
             Lea     Table0_7_8_F,A4   *Load jump-table
             MULU    #8,D5             *Acquire offset
             JSR    (A4,D5)            *Jump with offset
+	    RTS
 
 *------------------------------------------------------------------------- 
 MOVEDEST010 *Move destinataion is indirect
