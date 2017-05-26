@@ -2586,9 +2586,9 @@ CHECK_IF_DONE
 * Checks how many lines are on the display at one time ---------------    
 CHECK_LINES
         LEA         numOfLines,A4       * load number of lines storage address into A4
-        ADDI.B      #$1,(A4)             * add 1 to the line counter
-        CMPI.B      #$1E,(A4)            * compare if number of lines is 30
-        BEQ         LINE_LIMIT          * branch if equal to 30
+        ADDI.B      #$1,(A4)            * add 1 to the line counter
+        CMPI.B      #$1E,(A4)           * compare if number of lines is 30
+        BGE         LINE_LIMIT          * branch if equal to 30
         RTS                             * return to subroutine 
 
 * Allows to print only 30 lines of OP code per page ------------------
@@ -2617,6 +2617,8 @@ DONT_CONTINUE
 
 * Goes back to printing OP-codes -------------------------------------
 CONTINUE_PRINT
+        LEA         numOfLines,A4       * load number of lines storage address into A4
+        MOVE.W      #$00000000,(A4)     * RESET the line counter
         RTS                             * return to subroutine
 
 * The program has deconstructed from start address to end address ----
@@ -2993,4 +2995,3 @@ TESTPOG6
           MOVE.L    #$FFFFFFFF,D0
           
     END    START        ; last line of source
-
