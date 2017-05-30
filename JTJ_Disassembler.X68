@@ -408,7 +408,7 @@ PRINT_READY
               
 MAIN:  
             MOVE.W      (A6)+,D6        ;MOVE NEXT OPCODE INTO D6...A6 starts as user entered the start address
-            CMP.W       #$47E1,D6
+            CMP.W       #$4E71,D6
             BEQ         _NOP
             CMP.W       #$4E75,D6
             BEQ         _RTS
