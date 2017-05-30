@@ -338,6 +338,11 @@ GOODADDRESS
         MOVE.L      D6,$00FFFE30        * stores number of instructions
         
         MOVE.L      A6,D6
+	LEA         numOfLines,A4       * load number of lines storage address into A4
+        MOVE.W      #$00000000,(A4)     * RESET the line counter
+        LEA         BLANKLINE,A1	* load BLANKLINE into A1
+        MOVE        #14,D0
+        TRAP        #15
         
         LEA         storage,A2          * loads storage 
         BRA         STARTDECODE         * branch to STARTDECODE
@@ -2170,6 +2175,7 @@ DISPLACEMENT ;special case for BRA instructions
 LONGDISP
             MOVEA.L     A6,A5                           * move A6 into A5
             ADD.L       #2,A5                           * add 2 to A5
+	    ADD.L	#4,A6				* increment the long 
             MOVE.L      (A5),D1                         * move content in inside the address A5 into D1
             
             CMP.L       #$7FFFFFFF,D1                   * compare if D1 is less than 7FFFFFFF
@@ -2179,6 +2185,7 @@ LONGDISP
 * Case for displacement being only 16 bits or 4 bytes ------------------------
 WORDISP
             MOVEA.L     A6,A5                           * move A6 into A5
+	    ADD.L	#2,A6				* increment the word 
             MOVE.W      (A5),D1                         * move content in inside the address A5 into D1
             
             CMPI.L      #$7FFF,D1                       * compare if D1 is less than 7FFF
@@ -2660,7 +2667,7 @@ CHECK_IF_DONE
 CHECK_LINES
         LEA         numOfLines,A4       * load number of lines storage address into A4
         ADDI.B      #$1,(A4)            * add 1 to the line counter
-        CMPI.B      #$1F,(A4)           * compare if number of lines is 30
+        CMPI.B      #$1E,(A4)           * compare if number of lines is 30
         BGE         LINE_LIMIT          * branch if equal to 30
         RTS                             * return to subroutine 
 
@@ -2690,7 +2697,10 @@ DONT_CONTINUE
 
 * Goes back to printing OP-codes -------------------------------------
 CONTINUE_PRINT
-        LEA         numOfLines,A4       * load number of lines storage address into A4
+        LEA         BLANKLINE,A1	* load BLANKLINE into A1
+        MOVE        #14,D0
+        TRAP        #15
+	LEA         numOfLines,A4       * load number of lines storage address into A4
         MOVE.W      #$00000000,(A4)     * RESET the line counter
         RTS                             * return to subroutine
 
@@ -2797,6 +2807,7 @@ NOTEVEN         DC.B    'The address input has to be an even value...',CR,LF,0
 RUNAGAIN        DC.B    'Do you want to run the program again? (y,n) ',0
 BAD_ANSWER      DC.B    CR,LF,'Invalid answer, please input y or n ',0
 NEXT_PAGE       DC.B    'Please click Enter to go to next page...',0
+BLANKLINE       DC.B    '                                        ',CR,LF,0
 
 BADINPUT DC.B       'Input is not valid try again...',CR,LF,0
 BADADDRESS DC.B     'Address input is not valid try again...',CR,LF,0
