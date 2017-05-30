@@ -860,6 +860,7 @@ _BLE
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 _JSR
+	    JSR         VALIDSOURCEMODE *Do not have to handle displacement
             MOVE.B      #'J',(A2)+
             MOVE.B      #'S',(A2)+
             MOVE.B      #'R',(A2)+
