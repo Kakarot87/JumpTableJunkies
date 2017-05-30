@@ -613,15 +613,40 @@ MAIN:
             CMP.W       #$7000,D5
             BEQ         _MOVEQL
             
-_DATA
+_DATA                                   
             MOVE.B      #'D',(A2)+      ;Couldn't decode, print DATA
             MOVE.B      #'A',(A2)+
             MOVE.B      #'T',(A2)+
             MOVE.B      #'A',(A2)+ 
             MOVE.B      #9,(A2)+        ;tab  
             MOVE.B      #9,(A2)+        ;tab 
+            MOVE.W      D6,D3
+            JSR         UNDEFINED           
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+    
+UNDEFINED   *Used for DATA printing
+            MOVE.W  D3,D2           *Move to D2 to get shifted
+            JSR     WORDSHIFT1      *Shift first character
+            LEA     Table0_7_8_F,A4 *Load table
+            MULU.W  #8,D2           *Acquire offset
+            JSR     (A4,D2)         *Convert current value from memory to hex
+            MOVE.W  D3,D2           *Move to D2 to get shifted
+            JSR     WORDSHIFT2      *Shift second character
+            LEA     Table0_7_8_F,A4 *Load table
+            MULU.W  #8,D2           *Acquire offset
+            JSR     (A4,D2)         *Convert current value from memory to hex
+            MOVE.W  D3,D2           *Move to D2 to get shifted on
+            JSR     WORDSHIFT3      *Shift third character
+            LEA     Table0_7_8_F,A4 *Load table
+            MULU.W  #8,D2           *Acquire offset
+            JSR     (A4,D2)         *Convert current value from memory to hex
+            MOVE.W  D3,D2           *Move to D2 to get shifted on
+            JSR     WORDSHIFT4      *Shift fourth character
+            LEA     Table0_7_8_F,A4 *Load jump-table 
+            MULU.W  #8,D2           *For offset
+            JSR     (A4,D2)         *Convert current value from memory to hex
+            RTS
            
 _NOP
             MOVE.B      #'N',(A2)+
