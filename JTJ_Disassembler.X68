@@ -1,6 +1,6 @@
 *----------------------------------------------------------- 
 * Title      : Jump Table Junkies 68K DisAssembler
-* Written by : Bogdan Boiko, John Sliwa, Geoff Lebbos
+* Written by : Bogdan Boiko, John Sliwa, Geoffrey Lebbos
 * Date       : 05-23-2017
 * Description:
 *---------------------------------------------------------------------
@@ -2859,7 +2859,7 @@ PROJECT DC.B        '...........................................................
     
 
 TESTPOG1
-*test ADD,ADDI,ADDA instructions
+*test ADD,ADDI,ADDA,ADDQ instructions
 
           ADD.B   D0,D1
           ADD.W     D0,D1
@@ -2872,6 +2872,9 @@ TESTPOG1
           ADD.W     $7000,D0
           ADD.W  4(PC),D0
           ADD.L  9(PC),D0
+          ADDQ.B  #1,D4
+          ADDQ.W  #4,D5
+          ADDQ.L  #8,D3
           ABCD D0,D1     *DATA
           ADDA.W D1,A0
           ADDA.L D1,A0
@@ -2888,7 +2891,7 @@ TESTPOG1
           ADDI.L    #$4040A0A0,-(A0)
           ADDI.L  #$70000000,(SP)
           ADDI.W    #$6000,(SP)
-          MOVE.L    #$FFFFFFFF,D0   
+          MOVE.L    #$FFFFFFFF,D0    
 
 
 TESTPOG2
@@ -3062,7 +3065,7 @@ TESTPOG5
      
 
 TESTPOG6
-*MOVE,MOVEA,MOVEM
+*MOVE,MOVEA,MOVEM,MOVEQ
      
           MOVE $AA00,$AB00
           MOVE $AA00AA,$AB00AB
@@ -3073,6 +3076,9 @@ TESTPOG6
           MOVE $AA00,SP
           MOVE $FFFF,(SP)+
           MOVE (SP)+,D0
+          MOVEQ.L   #$FF,D1
+          MOVEQ.L   #$34,D4
+          MOVEQ.L   #55,D3
           MOVEM     A0/A1/A2/A3,(SP)-
           MOVEM     (SP)+,A0/A1/A2/A3   
           MOVEM     A0-A6,(SP)-
