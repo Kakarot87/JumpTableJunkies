@@ -852,6 +852,13 @@ _TRAP
             MOVE.B      #'P',(A2)+
             MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #'#',(A2)+
+            MOVE.B      #'$',(A2)+
+            MOVE.W      D6,D2
+            JSR         BYTESHIFT2       *Shift bits of SECOND character
+            LEA         Table0_7_8_F,A4  *Load jump-table
+            MULU.W      #8,D2            *Acquire offset
+            JSR         (A4,D2)          *Convert current value from memory to hex
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
 **********************************************************************************************     
@@ -3280,6 +3287,7 @@ TESTPOG7
           STOP      #1
           ILLEGAL
           TRAP      #15
+          TRAPV
           RTR
           
           
