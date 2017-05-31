@@ -2165,7 +2165,7 @@ DISPLACEMENT ;special case for BRA instructions
             CLR         D1                      * clear D1
             CLR         D0                      * clear D0
             
-            MOVE.B      #'$',(A2)+              * input $ into A2 and incrament
+            MOVE.B      #'$',(A2)+              * input $ into A2 and increment
             MOVE.B      D6,D5                   * move D6 to D5
             CMP.B       #$FF,D5                 * compare if D5 is equal to FF
             BEQ         LONGDISP                * branch to LONGDISP if equal
@@ -2180,8 +2180,7 @@ DISPLACEMENT ;special case for BRA instructions
 * Case for displacement being 32 bits or 8 bytes -----------------------------
 LONGDISP
             MOVEA.L     A6,A5                           * move A6 into A5
-            ADD.L       #2,A5                           * add 2 to A5
-	    ADD.L	#4,A6				* increment the long 
+	        ADD.L	    #4,A6				            * increment the long 
             MOVE.L      (A5),D1                         * move content in inside the address A5 into D1
             
             CMP.L       #$7FFFFFFF,D1                   * compare if D1 is less than 7FFFFFFF
@@ -2191,7 +2190,6 @@ LONGDISP
 * Case for displacement being only 16 bits or 4 bytes ------------------------
 WORDISP
             MOVEA.L     A6,A5                           * move A6 into A5
-	    ADD.L	#2,A6				* increment the word 
             MOVE.W      (A5),D1                         * move content in inside the address A5 into D1
             
             CMPI.L      #$7FFF,D1                       * compare if D1 is less than 7FFF
@@ -2954,8 +2952,6 @@ TESTPOG3
           CLR  (SP)+
           CLR  $07(A2,A5.L)
           CMP  (A0),D0
-*          CMP.B  A0,D0
-*          CMP.W  SP,D6
           CMP.L  (SP)+,D2
           CMP  $07(A2,A3.W),D3
           CMPA $07(A2,A3.W),A0     
@@ -2965,7 +2961,6 @@ TESTPOG3
           CMPA   $8010A0FC,A3
           CMPA  $8032,A1
           CMPI  #$500,D0
-*         CMPI  #$A010A898,(A3)
           CMPI  #$A98F,$07(A2,A3.W)
           CMPI.L  #$A9CD8032,(A3)
           CMPI.L  #$A984,$F(A6,A6)
@@ -2974,16 +2969,6 @@ TESTPOG3
           EOR  D1,(A0)+
           EOR  D1,(SP)+
           EOR  D6,-(A0)
-*           EOR  D6,$8082
-*           EOR  D3,$A0FCA083
-*           EOR  D3,$07(A3,A2.L)
-*           EORI #$A986,D1
-*           EORI #$A98ACDC6,D1
-*           EORI #$A9,D3
-* *          EORI #$A986,$07(A3,A2.L)
-* *          EORI #$A98ACDC6,(A0)+
-*           EORI #$A9,(SP)
-*           MOVE.L    #$FFFFFFFF,D0
           
           
 TESTPOG4
@@ -3029,10 +3014,6 @@ TESTPOG4
 TESTPOG5
 *test ROL,ROR,SUB,SUBA,SUBI,SWAP
 
-*           SUB  D0,(A0)
-*           SUB  (A0),D7
-*           SUB  $07(A4,A0.L),D7
-*           SUB  D7,$07(A4,A0.L)
           SUB  (SP)+,D7
           SUB  (A0)+,D3
           SUB  -(A0),D1
