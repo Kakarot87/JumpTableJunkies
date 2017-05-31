@@ -1921,7 +1921,7 @@ _MOVEMW
             MOVE.B      #'E',(A2)+
             MOVE.B      #'M',(A2)+
             MOVE.B      #'.',(A2)+
-            MOVE.B      #'W',(A2)+
+            MOVE.B      #'W',(A2)+            
             MOVE.B      #9,(A2)+        ;tab
             MOVE.B      #' ',(A2)+ 
             JSR         BIT9_11         ;isolate data bits 9-11 into D5
@@ -1977,7 +1977,7 @@ _MOVEMMTR
             JSR     	BIT3_5          ;puts bits 3-5 ONLY in D5
             
             CMP.B   	#%010,D5        ;test for (An)
-            BEQ     	_An             ;
+            BEQ     	_An_MTR         ;
             CMP.B   	#%011,D5        ;test for (An)+
             BEQ     	_An_PLUS        ;
             CMP.B   	#%101,D5        ;test for (d16,An)
@@ -1999,21 +1999,14 @@ _MOVEMMTR
             CMP.B   	#%011,D5        ;test for  (d8,PC,Xn)
             BEQ     	_d8_PC_Xn       ;
 
-_An
-            RTS
 _d16_An
-            RTS
-_d8_An_Xn      
-            RTS 
-_xxxW 
-            RTS
-_xxxL   
-            RTS
+            BRA         PRINT
+_d8_An_Xn    
+            BRA         PRINT
 _d16_PC 
-            RTS
+            BRA         PRINT
 _d8_PC_Xn
-            RTS
-            
+            BRA         PRINT            
 
 ***************************************************************
 *MOVEM Register to memory
@@ -2021,9 +2014,9 @@ _MOVEMRTM
             MOVE.W      D6,D5
             JSR     	BIT3_5          ;puts bits 3-5 ONLY in D5
             
-            CMP.B   	#%010,D5        ;test for (An) Address Register Indirect Mode 
-            BEQ     	_An             ;
-            CMP.B   	#%100,D5        ;test for -(An) Address Register Indirect with Predecrement Mode 
+            CMP.B   	#%010,D5        ;test for (An) Address Register Indirect Mode   D0/D1/D2,(An)
+            BEQ     	_An_RTM         
+            CMP.B   	#%100,D5        ;test for -(An) Address Register Indirect with Predecrement Mode D0/D1/D2,-(An)
             BEQ     	_MIN_An         ;
             CMP.B   	#%101,D5        ;test for (d16,An) Address Register Indirect with Displacement Mode
             BEQ     	_d16_An         ;
@@ -2035,11 +2028,136 @@ _MOVEMRTM
             MOVE.W      D6,D5
             JSR     	BIT0_2          ;puts bits 0-2 ONLY in D5
             
-            CMP.B   	#%000,D5        ;test for (xxx).W Absolute Data Addressing short
+            CMP.B   	#%000,D5        ;test for (xxx).W Absolute Data Addressing short    D1/D3/D5/D7,$6000
             BEQ     	_xxxW           ;
-            CMP.B   	#%001,D5        ;test for (xxx).L Absolute Data Addressing long
+            CMP.B   	#%001,D5        ;test for (xxx).L Absolute Data Addressing long     D1/D3/D5/D7,$00008000
             BEQ     	_xxxL           ; 
+*****************************************************************
+* (xxx).W Absolute Data Addressing short    D1/D3/D5/D7,$6000
+* 
+* MSB to LSB (16->0) D0 D1 D2 D3 D4 D5 D6 D7 A0 A1 A2 A3 A4 A5 A6 A7 
+*----------------------------------------------------------------
+_xxxW           
+            MOVE.W  	(A6)+,D6        ;read word with register list and increment
+	        MOVE.W  	D6,D5           ;copy to D5 to work on it
+	        
+            CMP.B   	#0,D5           ;are there any address registers in this byte?
+            BEQ     	xW_START_D      ;no, move to data registers
+            CLR         D2              ;Clear D2 counter
+xW_CHK_A     
+            CMP     	#8,D2           ;have we read the whole byte? done with this byte, move to next 
+            BEQ         xW_START_D      ;Finished with this byte go do data bytes
+            LSL.B   	#1,D5           ;shift first bit out (Starts at A0)
+            BCS     	xW_LOOP_A       ;if set, print the register # 
+            ADDI.B  	#1,D2           ;not set, increment counter & loop back
+            BRA         xW_CHK_A 
+xW_LOOP_A
+            MOVE.B  	#'A',(A2)+      ;print A
+            CLR         D4
+            MOVE.B  	D2,D4           ;copy counter
+            MULU    	#8,D4           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D4)         ;get register number and print it
+            MOVE.B  	#'/',(A2)+      ;print /
+            ADDI.B  	#1,D2           ;increment counter
+            BRA         xW_CHK_A
 
+xW_START_D  
+	        MOVE.W  	D6,D5           ;copy to D5 to work on it
+	        LSR.W       #8,D5           ;Shift to work on data register list now
+            CMP.B   	#0,D5           ;are there any data registers in this byte?
+            BEQ     	xW_DONE         ;no, finish
+            CLR         D2              ;Clear D2 counter
+xW_CHK_D     
+            CMP     	#8,D2           ;have we read the whole byte? done with this byte, move to next 
+            BEQ         xW_DONE         ;Finished with this byte go find destination
+            LSL.B   	#1,D5           ;shift first bit out (Starts at D0)
+            BCS     	xW_LOOP_D       ;if set, print the register #  
+            ADDI.B  	#1,D2           ;not set, increment counter & loop back
+            BRA         xW_CHK_D         
+xW_LOOP_D
+            MOVE.B  	#'D',(A2)+      ;print D
+            CLR         D4
+            MOVE.B  	D2,D4           ;copy counter
+            MULU    	#8,D4           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D4)         ;get register number and print it
+            MOVE.B  	#'/',(A2)+      ;print /
+            ADDI.B  	#1,D2           ;increment counter
+            BRA         xW_CHK_D
+xW_DONE
+            MOVE.B  	#' ',-(A2)      ;print ' ' (overwrites last '/' charecter) 
+            MOVE.B  	#',',(A2)+      
+            MOVE.B  	#'$',(A2)+      
+	        
+            JSR         IMEDWORD        ;Print the word, this post increments A6 in the sub
+
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+*****************************************************************
+* (xxx).L Absolute Data Addressing long     D1/D3/D5/D7,$00008000
+* 
+* MSB to LSB (16->0) D0 D1 D2 D3 D4 D5 D6 D7 A0 A1 A2 A3 A4 A5 A6 A7 
+*----------------------------------------------------------------
+_xxxL           
+            MOVE.W  	(A6)+,D6        ;read word with register list and increment
+	        MOVE.W  	D6,D5           ;copy to D5 to work on it
+	        
+            CMP.B   	#0,D5           ;are there any address registers in this byte?
+            BEQ     	xL_START_D      ;no, move to data registers
+            CLR         D2              ;Clear D2 counter
+xL_CHK_A     
+            CMP     	#8,D2           ;have we read the whole byte? done with this byte, move to next 
+            BEQ         xL_START_D      ;Finished with this byte go do data bytes
+            LSL.B   	#1,D5           ;shift first bit out (Starts at A0)
+            BCS     	xL_LOOP_A       ;if set, print the register # 
+            ADDI.B  	#1,D2           ;not set, increment counter & loop back
+            BRA         xL_CHK_A 
+xL_LOOP_A
+            MOVE.B  	#'A',(A2)+      ;print A
+            CLR         D4
+            MOVE.B  	D2,D4           ;copy counter
+            MULU    	#8,D4           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D4)         ;get register number and print it
+            MOVE.B  	#'/',(A2)+      ;print /
+            ADDI.B  	#1,D2           ;increment counter
+            BRA         xL_CHK_A
+
+xL_START_D  
+	        MOVE.W  	D6,D5           ;copy to D5 to work on it
+	        LSR.W       #8,D5           ;Shift to work on data register list now
+            CMP.B   	#0,D5           ;are there any data registers in this byte?
+            BEQ     	xL_DONE         ;no, finish
+            CLR         D2              ;Clear D2 counter
+xL_CHK_D     
+            CMP     	#8,D2           ;have we read the whole byte? done with this byte, move to next 
+            BEQ         xL_DONE         ;Finished with this byte go find destination
+            LSL.B   	#1,D5           ;shift first bit out (Starts at D0)
+            BCS     	xL_LOOP_D       ;if set, print the register #  
+            ADDI.B  	#1,D2           ;not set, increment counter & loop back
+            BRA         xL_CHK_D         
+xL_LOOP_D
+            MOVE.B  	#'D',(A2)+      ;print D
+            CLR         D4
+            MOVE.B  	D2,D4           ;copy counter
+            MULU    	#8,D4           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D4)         ;get register number and print it
+            MOVE.B  	#'/',(A2)+      ;print /
+            ADDI.B  	#1,D2           ;increment counter
+            BRA         xL_CHK_D
+xL_DONE
+            MOVE.B  	#' ',-(A2)      ;print ' ' (overwrites last '/' charecter) 
+            MOVE.B  	#',',(A2)+      
+            MOVE.B  	#'$',(A2)+      
+            JSR         IMEDWORD        ;Print the word, this post increments A6 in the sub
+            JSR         IMEDWORD        ;Print the word, this post increments A6 in the sub
+
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+
+            
 *****************************************************************
 * pre decrement mode If the effective address is specified by the predecrement mode, 
 * only a register-to-memory operation is allowed. 
@@ -2111,6 +2229,76 @@ PD_DONE
             
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
+*****************************************************************
+* pre decrement mode If the effective address is specified by the predecrement mode, 
+* only a register-to-memory operation is allowed. 
+* MSB to LSB (16->0) D0 D1 D2 D3 D4 D5 D6 D7 A0 A1 A2 A3 A4 A5 A6 A7 
+*----------------------------------------------------------------
+* address register pre decrement mode  
+_An_RTM
+            MOVE.W      D6,D5
+            JSR     	BIT0_2          ;puts bits 0-2 ONLY in D5
+            MOVE.W      D5,D3           ;Copy D5, into D3 for use in final print
+            
+            MOVE.W  	(A6)+,D6        ;read word with register list and increment
+	        MOVE.W  	D6,D5           ;copy to D5 to work on it
+	        
+            CMP.B   	#0,D5           ;are there any address registers in this byte?
+            BEQ     	AnR_START_D      ;no, move to data registers
+            CLR         D2              ;Clear D2 counter
+AnR_CHK_A     
+            CMP     	#8,D2           ;have we read the whole byte? done with this byte, move to next 
+            BEQ         AnR_START_D      ;Finished with this byte go do data bytes
+            LSL.B   	#1,D5           ;shift first bit out (Starts at A0)
+            BCS     	AnR_LOOP_A       ;if set, print the register # 
+            ADDI.B  	#1,D2           ;not set, increment counter & loop back
+            BRA         AnR_CHK_A 
+AnR_LOOP_A
+            MOVE.B  	#'A',(A2)+      ;print A
+            CLR         D4
+            MOVE.B  	D2,D4           ;copy counter
+            MULU    	#8,D4           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D4)         ;get register number and print it
+            MOVE.B  	#'/',(A2)+      ;print /
+            ADDI.B  	#1,D2           ;increment counter
+            BRA         AnR_CHK_A
+
+AnR_START_D  
+	        MOVE.W  	D6,D5           ;copy to D5 to work on it
+	        LSR.W       #8,D5           ;Shift to work on data register list now
+            CMP.B   	#0,D5           ;are there any data registers in this byte?
+            BEQ     	AnR_DONE         ;no, finish
+            CLR         D2              ;Clear D2 counter
+AnR_CHK_D     
+            CMP     	#8,D2           ;have we read the whole byte? done with this byte, move to next 
+            BEQ         AnR_DONE         ;Finished with this byte go find destination
+            LSL.B   	#1,D5           ;shift first bit out (Starts at D0)
+            BCS     	AnR_LOOP_D       ;if set, print the register #  
+            ADDI.B  	#1,D2           ;not set, increment counter & loop back
+            BRA         AnR_CHK_D         
+AnR_LOOP_D
+            MOVE.B  	#'D',(A2)+      ;print D
+            CLR         D4
+            MOVE.B  	D2,D4           ;copy counter
+            MULU    	#8,D4           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D4)         ;get register number and print it
+            MOVE.B  	#'/',(A2)+      ;print /
+            ADDI.B  	#1,D2           ;increment counter
+            BRA         AnR_CHK_D
+AnR_DONE
+            MOVE.B  	#',',-(A2)      ;print ',' (overwrites last '/' charecter) 
+            MOVE.B  	#',',(A2)+      ;print ',' (overwrites last '/' charecter) 
+            MOVE.B  	#'(',(A2)+      ;print (
+            MOVE.B  	#'A',(A2)+      ;print A
+            MULU    	#8,D3           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D3)         ;get register number and print it
+            MOVE.B  	#')',(A2)+      ;print )
+            
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
 
 *********************************************************
 *Post Increment Mode
@@ -2173,6 +2361,70 @@ PI_LOOP_A
             ADDI.B  	#1,D2           ;increment counter
             BRA         PI_CHK_A
 PI_DONE
+            MOVE.B  	#' ',-(A2)      ; Overwrite last '/'
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
+            
+*********************************************************
+*Address Indirect Memory to register
+*If the effective address is specified by the postincrement 
+*mode, only a memory-to-register operation is allowed
+*********************************************************
+_An_MTR
+            MOVE.W      D6,D5
+            JSR     	BIT0_2          ;puts bits 0-2 ONLY in D5
+
+            MOVE.B  	#'(',(A2)+      
+            MOVE.B  	#'A',(A2)+      
+            MULU    	#8,D5           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D5)         ;get register number and print it
+            MOVE.B  	#')',(A2)+          
+            MOVE.B  	#',',(A2)+                 
+            
+            MOVE.W  	(A6)+,D6        ;read word with register list and increment
+	        MOVE.W  	D6,D5           ;copy to D5 to work on it
+            CLR         D2              ;Clear D2 counter    
+AnM_CHK_D     
+            CMP     	#8,D2           ;have we read the whole byte? done with this byte, move to next 
+            BEQ         AnM_START_A      ;Finished with this byte go do Address bytes
+            LSR.W   	#1,D5           ;shift first bit out (Starts at D0)
+            BCS     	AnM_LOOP_D       ;if set, print the register # 
+            ADDI.B  	#1,D2           ;not set...increment counter, read next bit
+            BRA         AnM_CHK_D        
+AnM_LOOP_D
+            MOVE.B  	#'D',(A2)+      
+            CLR         D4
+            MOVE.B  	D2,D4           ;copy counter
+            MULU    	#8,D4           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D4)         ;get register number and print it
+            MOVE.B  	#'/',(A2)+      
+            ADDI.B  	#1,D2           ;increment counter
+            BRA         AnM_CHK_D
+
+AnM_START_A  
+            CMP.B   	#0,D5           ;are there address registers in this byte?
+            BEQ     	AnM_DONE         ;no, finish
+            CLR         D2              ;Clear D2 counter
+AnM_CHK_A     
+            CMP     	#8,D2           ;have we read the whole byte? 
+            BEQ         PI_DONE         ;Finished 
+            LSR.B   	#1,D5           ;shift first bit out (Starts at A0)
+            BCS     	AnM_LOOP_A       ;if set, print the register #  
+            ADDI.B  	#1,D2           ;not set...increment counter, read next bit
+            BRA         AnM_CHK_A           
+AnM_LOOP_A
+            MOVE.B  	#'A',(A2)+      
+            CLR         D4
+            MOVE.B  	D2,D4           ;copy counter
+            MULU    	#8,D4           ;get ready for table
+            LEA     	Table0_7_8_F,A4 ;load table
+            JSR     	(A4,D4)         ;get register number and print it
+            MOVE.B  	#'/',(A2)+      
+            ADDI.B  	#1,D2           ;increment counter
+            BRA         AnM_CHK_A
+AnM_DONE
             MOVE.B  	#' ',-(A2)      ; Overwrite last '/'
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR 
@@ -3039,724 +3291,5 @@ PROJECT DC.B        '...........................................................
         DC.B        '...........Bogdan Boiko, Geoffrey Lebbos, John Sliwa.........',CR,LF,CR,LF,0  
                      
     
-
-TESTPOG1
-*test ADD,ADDI,ADDA,ADDQ instructions
-
-          ADD.B   D0,D1
-          ADD.W     D0,D1
-          ADD.L     D0,D1
-          ADD.L     (A0),D1
-          ADD.L     (SP),D1
-          ADD.W     (A0)+,D2
-          ADD.L     -(A0),D5
-          ADD.L  #$7000,D0
-          ADD.W     $7000,D0
-          ADD.W  4(PC),D0
-          ADD.L  9(PC),D0
-          ADDQ.B  #1,D4
-          ADDQ.W  #4,D5
-          ADDQ.L  #8,D3
-          ABCD D0,D1     *DATA
-          ADDA.W D1,A0
-          ADDA.L D1,A0
-          ADDA.L    (A0),A0
-          ADDA.W    (A0)+,A5
-          ADDA.W    -(A0),A3
-          ADDA.L  #$7000,A0
-          ADDA.W    $6000,SP
-          ADDA.W  4(PC),A6
-          ADDA.L  9(PC),A5
-          ABCD D0,D1     *DATA
-          ADDI.B #$30,(A0)
-          ADDI.W #4000,(A0)+
-          ADDI.L    #$4040A0A0,-(A0)
-          ADDI.L  #$70000000,(SP)
-          ADDI.W    #$6000,(SP)
-          MOVE.L    #$FFFFFFFF,D0    
-
-
-TESTPOG2
-*test AND,ANDI,ASL,ASR,LSL,LSR,BSR,JSR,RTS
-
-          AND.B  D0,D1
-          AND.W     D0,D1
-          AND.L     D0,D1
-          AND.L     (A0),D1
-          AND.L     (SP),D1
-          AND.W     (A0)+,D2
-          AND.L     -(A0),D5
-          AND.L  #$7000,D0
-          AND.W     $7000,D0
-          AND.B  #$30,D0
-          AND.W  #4000,(A0)+
-          AND.L     #$4040A0A0,-(A0)
-          AND.L  #$70000000,(SP)
-          AND.W     #$6000,(SP)
-          ABCD D0,D1          *DATA
-          ANDI.B #$80,D1
-          ANDI.W    #$756A,D1
-          ANDI.L    #80808080,(A0)
-          ANDI.B #$80,(A0)+
-          ANDI.W    #$756A,-(A0)
-          ANDI.L    #80808080,(SP)
-          ANDI.W    #$756A,D1
-          ANDI.L    #80808080,D1
-          LSL.B     #01,D1
-          LSL.W     #01,D2
-          LSL.L     #01,D4
-          LSR.B     #01,D1
-          LSR.W     #01,D2
-          LSR.L     #01,D4
-          ABCD D0,D1
-          ASL.B     #01,D1
-          ASL.W     #01,D2
-          ASL.L     #01,D4
-          ASR.B     #01,D1
-          ASR.W     #01,D2
-          ASR.L     #01,D4
-          JSR  TESTPOG2
-          RTS
-          JMP  TESTPOG2
-          BSR  TESTPOG2
-          MOVE.L    #$FFFFFFFF,D0
-
-
-TESTPOG3
-*test CLR,CMP,CMPI,EOR,EORI,LEA
-     
-          LEA  TESTPOG3,A0
-          LEA  TESTPOG3,A7   
-          LEA  TESTPOG2,A3
-          CLR  D0
-          CLR  D7
-          CLR  (A0)+
-          CLR  -(A0)
-          CLR  (SP)
-          CLR  (SP)+
-          CLR  $07(A2,A5.L)
-          CMP  (A0),D0
-          CMP.L  (SP)+,D2
-          CMP  $07(A2,A3.W),D3
-          CMPA $07(A2,A3.W),A0     
-          CMPA $9(A2,A3.W),A6
-          CMPA   A0,A2
-          CMPA   A0,SP
-          CMPA   $8010A0FC,A3
-          CMPA  $8032,A1
-          CMPI  #$500,D0
-          CMPI  #$A98F,$07(A2,A3.W)
-          CMPI.L  #$A9CD8032,(A3)
-          CMPI.L  #$A984,$F(A6,A6)
-          EOR  D0,D2
-          EOR  D1,(A0)
-          EOR  D1,(A0)+
-          EOR  D1,(SP)+
-          EOR  D6,-(A0)
-          
-          
-TESTPOG4
-*test EXG,NOP,NEG,NOT,OR,ORI
-          EXG  D0,D1
-          EXG  A0,A1
-          EXG  D0,A1
-          EXG  A5,D0
-          NOP
-          NOP  
-          NOP
-          NEG  D0
-          NEG  (A0) 
-          NEG  (A0)+
-          NEG  -(A0)
-          NEG  (SP)+
-          NEG  $07(A2,A3.L)
-          NOT  D7
-          NOT  (A0) 
-          NOT  (A0)+
-          NOT  -(A0)
-          NOT  (SP)+
-          NOT  $07(A2,A3.L)
-          OR   D0,(A0)
-          OR   (A0),D7
-          OR   $07(A4,A0.L),D7
-          OR   D7,$07(A4,A0.L)
-          OR   (SP)+,D7
-          OR   (A0)+,D3
-          OR   -(A0),D1
-          OR   D1,-(A0)
-          ORI  #04,(A0)
-          ORI  #$9862,D7
-          ORI  #$2982,$07(A4,A0.L)
-          ORI  #$29,$07(A4,A0.L)
-          ORI.L     #$1,D7
-          ORI.W     #$FFFF,(A0)+
-          ORI.B     #$F,D1
-          ORI  #$A082,-(A0)
-          MOVE.L    #$FFFFFFFF,D0
-
-
-TESTPOG5
-*test ROL,ROR,SUB,SUBA,SUBI,SWAP
-
-          SUB  (SP)+,D7
-          SUB  (A0)+,D3
-          SUB  -(A0),D1
-          SUB  D1,-(A0)
-          SUBA $07(A4,A0.L),A0
-          SUBA $07(A4,A0.L),A1
-          SUBA $07(A4,A0.L),A2
-          SUBA $07(A4,A0.L),A3
-          SUBA $07(A4,A0.L),A4
-          SUBA $07(A4,A0.L),A5     
-          SUBA $07(A4,A0.L),A6
-          SUBA D0,A3
-          SUBA $00AA00AA,A7
-          SUBA $A000,SP
-          SUBI #$04,(A0)
-          SUBI #$A000,(A3)+
-          SUBI #$A000,-(SP)
-          SUBI #$FFFF,$07(A4,A0.L)
-          ROL  #8,D0
-          ROR  #8,D7
-          ROL  #1,D2
-          ROR  #3,D4
-          SWAP D0
-          SWAP D1
-          SWAP D2
-          SWAP D3
-          SWAP D4   
-          SWAP D6
-          MOVE.L    #$FFFFFFFF,D0
-     
-
-TESTPOG6
-*MOVE,MOVEA,MOVEM,MOVEQ
-     
-          MOVE $AA00,$AB00
-          MOVE $AA00AA,$AB00AB
-          MOVE $FFAAFFBB,$ACD3F70
-          MOVE (A0),D0
-          MOVE (A0)+,D3
-          MOVE $AA00,A0
-          MOVE $AA00,SP
-          MOVE $FFFF,(SP)+
-          MOVE (SP)+,D0
-          MOVEQ.L   #$FF,D1
-          MOVEQ.L   #$34,D4
-          MOVEQ.L   #55,D3
-          MOVEM     A0/A1/A2/A3,(SP)-
-          MOVEM     (SP)+,A0/A1/A2/A3   
-          MOVEM     A0-A6,(SP)-
-          MOVEA     $07(A4,A0.L),A0
-          MOVEA     $00AA77FF,A6
-          MOVEA     (SP),A2
-          MOVEA     (SP)+,A3
-          MOVEA     -(A3),A4
-          MOVEA     D3,A1
-          MOVE.L    #$FFFFFFFF,D0
-          
-TESTPOG7
-*
-          ANDI      #15,CCR 
-          ANDI      #15,SR   
-          ORI       #15,CCR 
-          ORI       #15,SR   
-          EORI      #15,CCR 
-          EORI      #15,SR    
-          RESET
-          RTE
-          STOP      #1
-          ILLEGAL
-          TRAP      #15
-          TRAPV
-          RTR
-************
-    ADDQ.W  #$1,D1    
-    ADDQ.W  #$7,D3             
-    ADDQ.W  #$3,A2                
-    ADDQ.W  #$5,(A3)              
-    ADDQ.W  #$7,(A4)+             
-    ADDQ.W  #$8,-(A5)              
-    ADDQ.W  #$6,$6000              
-    ADDQ.W  #$7,$8000             
-    ADDQ.W  #$8,$A000  
-
-    BCC     MAIN
-    BGT     MAIN
-    BLE     MAIN
-DATA_test DC.B 'MOVE', 0
-DATA_test1 DC.B 'I AM DATA', 0
-DATA_test2 DC.B 'TESTCODECHECKOKHAHA', 0
-    MOVE.B  D0,D1
-    MOVE.B  (A3),(A4)+
-    MOVE.B  (A4)+,-(A5)
-    MOVE.B  -(A5),$6000
-    MOVE.B  $6000,$7000
-    MOVE.B  $7000,$8000
-    MOVE.B  $8000,$7000
-    MOVE.B  $8000,$9000
-    MOVE.B  #$70,$4000
-    MOVE.B  #$70,$A000
-    
-    
-    MOVE.W  D0,D1
-    MOVE.W  D1,A2 
-    MOVE.W  A2,(A3)
-    MOVE.W  (A3),(A4)+ 
-    MOVE.W  (A4)+,-(A5) 
-    MOVE.W  -(A5),$6000 
-    MOVE.W  $6000,$7000
-    MOVE.W  $7000,$8000
-    MOVE.W  $8000,$7000
-    MOVE.W  $8000,$9000 
-    MOVE.W  #$70,$4000
-    MOVE.W  #$70,$A000
-    MOVE.W  #$7000,$4000
-    MOVE.W  #$7000,$A000
-    
-    MOVE.L  D0,D1 
-    MOVE.L  D1,A2 
-    MOVE.L  A2,(A3)
-    MOVE.L  (A3),(A4)+
-    MOVE.L  (A4)+,-(A5)
-    MOVE.L  -(A5),$6000
-    MOVE.L  $6000,$7000
-    MOVE.L  $7000,$8000             
-    MOVE.L  $8000,$7000            
-    MOVE.L  $8000,$9000             
-    MOVE.L  #$70,$4000              
-    MOVE.L  #$70,$A000              
-    MOVE.L  #$7000,$4000            
-    MOVE.L  #$7000,$A000            
-    MOVE.L  #$70000000,$4000        
-    MOVE.L  #$70000000,$A000        
-    
-    MOVEA.W  D0,A0                  
-    MOVEA.W  A0,A1                  
-    MOVEA.W  (A1),A2               
-    MOVEA.W  (A2)+,A3              
-    MOVEA.W  -(A3),A4              
-    MOVEA.W  $4000,A5               
-    MOVEA.W  $A000,A6              
-    MOVEA.W  #$70,A7                
-    MOVEA.W  #$7000,A0             
-    
-    MOVEA.L  D0,A0                 
-    MOVEA.L  A0,A1                 
-    MOVEA.L  (A1),A2               
-    MOVEA.L  (A2)+,A3              
-    MOVEA.L  -(A3),A4               
-    MOVEA.L  $4000,A5               
-    MOVEA.L  $A000,A6              
-    MOVEA.L  #$70,A7               
-    MOVEA.L  #$7000,A0             
-    MOVEA.L  #$70000000,A1         
-    
-    MOVEQ  #$70,D7                 
-    
-    *MOVEM.L  (A3),D0/D2/D4/D6/A1/A3/A5/A7            
-    MOVEM.L  (A4)+,D0/D2/D4/D6/A1/A3/A5/A7          
-    *MOVEM.L  $6000,D0/D2/D4/D6/A1/A3/A5/A7          
-    *MOVEM.L  $8000,D0/D2/D4/D6/A1/A3/A5/A7          
-    MOVEM.L  (SP)+,D0-D7/A0-A7                       
-    
-    *MOVEM.L  A0/A2/A4/A6/D1/D3/D5/D7,(A3)           
-    MOVEM.L  A0/A2/A4/A6/D1/D3/D5/D7,-(A5)           
-    *MOVEM.L  A0/A2/A4/A6/D1/D3/D5/D7,$6000          
-    *MOVEM.L  A0/A2/A4/A6/D1/D3/D5/D7,$8000          
-    MOVEM.L  A7-A0/D7-D0,-(SP)                       
-    
-    *MOVEM.W  (A3),D0/D2/D4/D6/A1/A3/A5/A7            
-    MOVEM.W  (A4)+,D0/D2/D4/D6/A1/A3/A5/A7          
-    *MOVEM.W  $6000,D0/D2/D4/D6/A1/A3/A5/A7           
-    *MOVEM.W  $8000,D0/D2/D4/D6/A1/A3/A5/A7           
-    MOVEM.W  (SP)+,D0-D7/A0-A7                      
-    
-    *MOVEM.W  A0/A2/A4/A6/D1/D3/D5/D7,(A3)            
-    MOVEM.W  A0/A2/A4/A6/D1/D3/D5/D7,-(A5)           
-    *MOVEM.W  A0/A2/A4/A6/D1/D3/D5/D7,$6000           
-    *MOVEM.W  A0/A2/A4/A6/D1/D3/D5/D7,$8000           
-    MOVEM.W  A7-A0/D7-D0,-(SP)                       
-    
-    ADD.B  D0,D0                 
-    ADD.B  (A1),D2                
-    ADD.B  (A2)+,D3              
-    ADD.B  -(A3),D4               
-    ADD.B  $4000,D5              
-    ADD.B  $A000,D6               
-    ADD.B  #$70,D7               
-    
-    ADD.B  D0,D1                 
-    ADD.B  D2,(A3)                
-    ADD.B  D3,(A4)+               
-    ADD.B  D4,-(A5)               
-    ADD.B  D5,$6000              
-    ADD.B  D6,$8000              
-    
-    ADD.W  D0,D0                 
-    ADD.W  A0,D1                 
-    ADD.W  (A1),D2                
-    ADD.W  (A2)+,D3               
-    ADD.W  -(A3),D4               
-    ADD.W  $4000,D5               
-    ADD.W  $A000,D6               
-    ADD.W  #$70,D7               
-    ADD.W  #$7000,D0              
-    
-    ADD.W  D0,D1                  
-    ADD.W  D1,A2                 
-    ADD.W  D2,(A3)               
-    ADD.W  D3,(A4)+               
-    ADD.W  D4,-(A5)              
-    ADD.W  D5,$6000              
-    ADD.W  D6,$8000              
-    
-    ADD.L  D0,D0                  
-    ADD.L  A0,D1                 
-    ADD.L  (A1),D2               
-    ADD.L  (A2)+,D3               
-    ADD.L  -(A3),D4              
-    ADD.L  $4000,D5              
-    ADD.L  $A000,D6              
-    ADD.L  #$70,D7                
-    ADD.L  #$7000,D0              
-    ADD.L  #$70000000,D1         
-    
-    ADD.L  D0,D1                 
-    ADD.L  D1,A2                  
-    ADD.L  D2,(A3)               
-    ADD.L  D3,(A4)+              
-    ADD.L  D4,-(A5)              
-    ADD.L  D5,$6000              
-    ADD.L  D6,$8000              
-    
-    ADDA.W  D0,A0                
-    ADDA.W  A0,A1                 
-    ADDA.W  (A1),A2               
-    ADDA.W  (A2)+,A3             
-    ADDA.W  -(A3),A4              
-    ADDA.W  $4000,A5             
-    ADDA.W  $A000,A6             
-    ADDA.W  #$70,A7              
-    ADDA.W  #$7000,A0             
-    
-    ADDA.L  D0,A0                 
-    ADDA.L  A0,A1                
-    ADDA.L  (A1),A2              
-    ADDA.L  (A2)+,A3              
-    ADDA.L  -(A3),A4              
-    ADDA.L  $4000,A5             
-    ADDA.L  $A000,A6              
-    ADDA.L  #$70,A7               
-    ADDA.L  #$7000,A0            
-    ADDA.L  #$70000000,A1         
-    
-    ADDI.B  #$70,D1               
-    ADDI.B  #$70,(A3)              
-    ADDI.B  #$70,(A4)+             
-    ADDI.B  #$70,-(A5)             
-    ADDI.B  #$70,$6000             
-    ADDI.B  #$70,$8000             
-    
-    ADDI.W  #$70,D1                
-    ADDI.W  #$70,(A3)              
-    ADDI.W  #$7000,(A4)+          
-    ADDI.W  #$70,-(A5)             
-    ADDI.W  #$7000,$6000          
-    ADDI.W  #$70,$8000             
-    
-    ADDI.L  #$70,D1                
-    ADDI.L  #$70000000,(A3)        
-    ADDI.L  #$70,(A4)+             
-    ADDI.L  #$7000,-(A5)          
-    ADDI.L  #$70000000,$6000       
-    ADDI.L  #$70,$8000         
-
-    ADDQ.B  #$1,D1                        
-    ADDQ.B  #$3,(A3)              
-    ADDQ.B  #$4,(A4)+             
-    ADDQ.B  #$5,-(A5)              
-    ADDQ.B  #$6,$6000              
-    ADDQ.B  #$7,$8000             
-    ADDQ.B  #$8,$A000 
-
-    ADDQ.W  #$1,D1    
-    ADDQ.W  #$7,D3             
-    ADDQ.W  #$3,A2                
-    ADDQ.W  #$5,(A3)              
-    ADDQ.W  #$7,(A4)+             
-    ADDQ.W  #$8,-(A5)              
-    ADDQ.W  #$6,$6000              
-    ADDQ.W  #$7,$8000             
-    ADDQ.W  #$8,$A000   
-    
-    ADDQ.L  #$1,D1                
-    ADDQ.L  #$2,A2                
-    ADDQ.L  #$3,(A3)              
-    ADDQ.L  #$4,(A4)+             
-    ADDQ.L  #$5,-(A5)              
-    ADDQ.L  #$6,$6000              
-    ADDQ.L  #$7,$8000             
-    ADDQ.L  #$8,$A000       
-
-    SUB.B  D0,D0                 
-    SUB.B  (A1),D2                
-    SUB.B  (A2)+,D3              
-    SUB.B  -(A3),D4               
-    SUB.B  $4000,D5              
-    SUB.B  $A000,D6               
-*    SUB.B  #$70,D7            Translates to SUBI which is not required.   
-    
-    SUB.B  D0,D1                 
-    SUB.B  D2,(A3)                
-    SUB.B  D3,(A4)+               
-    SUB.B  D4,-(A5)               
-    SUB.B  D5,$6000              
-    SUB.B  D6,$8000              
-    
-    SUB.W  D0,D0                 
-    SUB.W  A0,D1                 
-    SUB.W  (A1),D2                
-    SUB.W  (A2)+,D3               
-    SUB.W  -(A3),D4               
-    SUB.W  $4000,D5               
-    SUB.W  $A000,D6               
-*    SUB.W  #$70,D7           Translates to SUBI which is not required.    
-*    SUB.W  #$7000,D0         Translates to SUBI which is not required.     
-    
-    SUB.W  D0,D1                  
-*    SUB.W  D1,A2             Translates to SUBA which is not required.    
-    SUB.W  D2,(A3)               
-    SUB.W  D3,(A4)+               
-    SUB.W  D4,-(A5)              
-    SUB.W  D5,$6000              
-    SUB.W  D6,$8000              
-    
-    SUB.L  D0,D0                  
-    SUB.L  A0,D1                 
-    SUB.L  (A1),D2               
-    SUB.L  (A2)+,D3               
-    SUB.L  -(A3),D4              
-    SUB.L  $4000,D5              
-    SUB.L  $A000,D6              
-*    SUB.L  #$70,D7          Translates to SUBI which is not required.      
-*    SUB.L  #$7000,D0        Translates to SUBI which is not required.      
-*    SUB.L  #$80000000,D1    Translates to SUBI which is not required.    
-    
-    SUB.L  D0,D1                 
-*    SUB.L  D1,A2            Translates to SUBA which is not required.       
-    SUB.L  D2,(A3)               
-    SUB.L  D3,(A4)+              
-    SUB.L  D4,-(A5)              
-    SUB.L  D5,$6000              
-    SUB.L  D6,$8000    
-
-    MULS  D0,D0                                 
-    MULS  (A1),D2               
-    MULS  (A2)+,D3               
-    MULS  -(A3),D4              
-    MULS  $4000,D5              
-    MULS  $A000,D6              
-    MULS  #$70,D7                
-    MULS  #$7000,D0          
-
-    DIVU  D0,D0                                 
-    DIVU  (A1),D2               
-    DIVU  (A2)+,D3               
-    DIVU  -(A3),D4              
-    DIVU  $4000,D5              
-    DIVU  $A000,D6              
-    DIVU  #$70,D7                
-    DIVU  #$7000,D0   
-                           
-    LEA (A1),A2                            
-    LEA $4000,A5               
-    LEA $A000,A6         
-    
-    CLR.B  D1                         
-    CLR.B  (A3)              
-    CLR.B  (A4)+             
-    CLR.B  -(A5)              
-    CLR.B  $6000              
-    CLR.B  $8000             
-    CLR.B  $A000
-
-    CLR.W  D1                         
-    CLR.W  (A3)              
-    CLR.W  (A4)+             
-    CLR.W  -(A5)              
-    CLR.W  $6000              
-    CLR.W  $8000             
-    CLR.W  $A000     
-    
-    CLR.L  D1                         
-    CLR.L  (A3)              
-    CLR.L  (A4)+             
-    CLR.L  -(A5)              
-    CLR.L  $6000              
-    CLR.L  $8000             
-    CLR.L  $A000
-    
-    AND.B  D0,D0                 
-    AND.B  (A1),D2                
-    AND.B  (A2)+,D3              
-    AND.B  -(A3),D4               
-    AND.B  $4000,D5              
-    AND.B  $A000,D6               
-    AND.B  #$70,D7               
-    
-    AND.B  D0,D1                 
-    AND.B  D2,(A3)                
-    AND.B  D3,(A4)+               
-    AND.B  D4,-(A5)               
-    AND.B  D5,$6000              
-    AND.B  D6,$8000              
-    
-    AND.W  D0,D0                                 
-    AND.W  (A1),D2                
-    AND.W  (A2)+,D3               
-    AND.W  -(A3),D4               
-    AND.W  $4000,D5               
-    AND.W  $A000,D6               
-    AND.W  #$70,D7               
-    AND.W  #$7000,D0              
-    
-    AND.W  D0,D1                                 
-    AND.W  D2,(A3)               
-    AND.W  D3,(A4)+               
-    AND.W  D4,-(A5)              
-    AND.W  D5,$6000              
-    AND.W  D6,$8000              
-    
-    AND.L  D0,D0                                
-    AND.L  (A1),D2               
-    AND.L  (A2)+,D3               
-    AND.L  -(A3),D4              
-    AND.L  $4000,D5              
-    AND.L  $A000,D6              
-    AND.L  #$70,D7                
-    AND.L  #$7000,D0              
-    AND.L  #$70000000,D1         
-    
-    AND.L  D0,D1                                  
-    AND.L  D2,(A3)               
-    AND.L  D3,(A4)+              
-    AND.L  D4,-(A5)              
-    AND.L  D5,$6000              
-    AND.L  D6,$8000
-    
-    OR.B  D0,D0                 
-    OR.B  (A1),D2                
-    OR.B  (A2)+,D3              
-    OR.B  -(A3),D4               
-    OR.B  $4000,D5              
-    OR.B  $A000,D6               
-    OR.B  #$70,D7               
-    
-    OR.B  D0,D1                 
-    OR.B  D2,(A3)                
-    OR.B  D3,(A4)+               
-    OR.B  D4,-(A5)               
-    OR.B  D5,$6000              
-    OR.B  D6,$8000              
-    
-    OR.W  D0,D0                                
-    OR.W  (A1),D2                
-    OR.W  (A2)+,D3               
-    OR.W  -(A3),D4               
-    OR.W  $4000,D5               
-    OR.W  $A000,D6               
-    OR.W  #$70,D7               
-    OR.W  #$7000,D0              
-    
-    OR.W  D0,D1                              
-    OR.W  D2,(A3)               
-    OR.W  D3,(A4)+               
-    OR.W  D4,-(A5)              
-    OR.W  D5,$6000              
-    OR.W  D6,$8000              
-    
-    OR.L  D0,D0                                  
-    OR.L  (A1),D2               
-    OR.L  (A2)+,D3               
-    OR.L  -(A3),D4              
-    OR.L  $4000,D5              
-    OR.L  $A000,D6              
-    OR.L  #$70,D7                
-    OR.L  #$7000,D0              
-    OR.L  #$70000000,D1         
-    
-    OR.L  D0,D1                             
-    OR.L  D2,(A3)               
-    OR.L  D3,(A4)+              
-    OR.L  D4,-(A5)              
-    OR.L  D5,$6000              
-    OR.L  D6,$8000
-    
-    CMP.B  D0,D0                 
-    CMP.B  (A1),D2                
-    CMP.B  (A2)+,D3              
-    CMP.B  -(A3),D4               
-    CMP.B  $4000,D5              
-    CMP.B  $A000,D6               
-    CMP.B  #$70,D7                         
-    
-    CMP.W  D0,D0                 
-    CMP.W  A0,D1                 
-    CMP.W  (A1),D2                
-    CMP.W  (A2)+,D3               
-    CMP.W  -(A3),D4               
-    CMP.W  $4000,D5               
-    CMP.W  $A000,D6               
-    CMP.W  #$70,D7               
-    CMP.W  #$7000,D0                        
-    
-    CMP.L  D0,D0                  
-    CMP.L  A0,D1                 
-    CMP.L  (A1),D2               
-    CMP.L  (A2)+,D3               
-    CMP.L  -(A3),D4              
-    CMP.L  $4000,D5              
-    CMP.L  $A000,D6              
-    CMP.L  #$70,D7                
-    CMP.L  #$7000,D0              
-    CMP.L  #$70000000,D1              
-    
-    ASL     (A0)
-    ASR     (A1)+
-    ASL     -(A2)
-    ASR     $4000
-    ASL     $A000
-    
-    ASL.B   #$7,D0
-    ASL.W   #$8,D1
-    ASL.L   D3,D2
-    
-    LSL     (A3)
-    LSR     (A4)+
-    LSL     -(A5)
-    LSR     $4000
-    LSL     $A000
-    
-    LSL.B   #$7,D0
-    LSL.W   #$8,D1
-    LSL.L   D5,D1
-    
-    ROL     (A6)
-    ROR     (A0)+
-    ROL     -(A1)
-    ROR     $4000
-    ROL     $A000
-    
-    ROL.B    #$7,D0
-    ROL.W    #$8,D1
-    ROL.L    D7,D1
-    
-    JSR     $A000
-    JSR     $4000
-    
-    RTS
-
-          
           
     END    START        ; last line of source
