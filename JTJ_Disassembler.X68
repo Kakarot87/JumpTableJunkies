@@ -1154,10 +1154,10 @@ _CLRB
             MOVE.B      #'R',(A2)+
             MOVE.B      #'.',(A2)+
             MOVE.B      #'B',(A2)+
-            MOVE.B      #' ',(A2)+
-            MOVE.B      #' ',(A2)+
-            MOVE.B      #' ',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -1184,10 +1184,10 @@ _CLRL
             MOVE.B      #'R',(A2)+
             MOVE.B      #'.',(A2)+
             MOVE.B      #'L',(A2)+
-            MOVE.B      #' ',(A2)+
-            MOVE.B      #' ',(A2)+
-            MOVE.B      #' ',(A2)+
             MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
+            MOVE.B      #' ',(A2)+
             JSR         EA_5_0          ;determine source addressing mode & number and print    
             JSR         PRINT           ;print the buffer
             BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
@@ -3026,24 +3026,6 @@ INPUTSTARTADD DC.B  'Enter a starting address for the deconstructor: ',0
 INPUTENDADD DC.B    CR,LF,'Enter ending address: ',0
 
 FINISHEDPRINT   DC.B    CR,LF,'The program has completed the deconstruction!!!',CR,LF,0
-
-
-SCREEN  DC.B        '///////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\',CR,LF
-        DC.B        '|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||',CR,LF
-        DC.B        '....................-.                 .-....................',CR,LF
-        DC.B        '................../´¯)                 (¯`\..................',CR,LF
-        DC.B        '................./¯../                 \..¯\.................',CR,LF
-        DC.B        '................/.../                   \...\................',CR,LF
-        DC.B        '.........../´¯¯/´´´/¯¯¯`-.         .-´¯¯¯\```\¯¯`\...........',CR,LF
-        DC.B        '........./´/../.../..../´¯\       /¯`\....\...\..\`\.........',CR,LF
-        DC.B        '........( (  ´...´. ¯ /´..`)     (´..`\ ¯ .`...`..) )........',CR,LF
-        DC.B        '.........\............`..../     \....´............/.........',CR,LF
-        DC.B        '..........\........... _.·´       `·._ .........../..........',CR,LF
-        DC.B        '...........\..........(               )........../...........',CR,LF
-        DC.B        '............\..........\             /........../............',CR,LF
-        DC.B        '.............................................................',CR,LF
-        DC.B        '|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||',CR,LF
-        DC.B        '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\//////////////////////////////',CR,LF,CR,LF,0
  
 PROJECT DC.B        '.............................................................',CR,LF
         DC.B        '......_..._....._..._....._..._____..........._____..._..._..',CR,LF
@@ -3056,10 +3038,6 @@ PROJECT DC.B        '...........................................................
         DC.B        '.................... Jump Table Junkies .....................',CR,LF
         DC.B        '...........Bogdan Boiko, Geoffrey Lebbos, John Sliwa.........',CR,LF,CR,LF,0  
                      
-
-    
-    
-    
     
 
 TESTPOG1
