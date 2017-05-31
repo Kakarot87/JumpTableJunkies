@@ -615,8 +615,14 @@ MAIN:
             BEQ         _MOVEMW
             CMP.W       #$48C0,D5
             BEQ         _MOVEML
-            CMP.W       #$7000,D5
+            *CMP.W       #$7000,D5
+            *BEQ         _MOVEQL
+	    MOVE.W      D6,D5       *Special case for MOVEQ
+            LSR.W       #6,D5       *SHIFT until .B contains 07
+            LSR.W       #6,D5
+            CMP.B       #$07,D5
             BEQ         _MOVEQL
+
             
 _DATA                                   
             MOVE.B      #'D',(A2)+      ;Couldn't decode, print DATA
