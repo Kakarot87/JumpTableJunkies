@@ -413,10 +413,43 @@ PRINT_READY
               
 MAIN:  
             MOVE.W      (A6)+,D6        ;MOVE NEXT OPCODE INTO D6...A6 starts as user entered the start address
+*********************************************Non Required********************************************************************         
+            CMP.W       #$003C,D6
+            BEQ         _ORI_CCR
+            CMP.W       #$007C,D6
+            BEQ         _ORI_SR
+            CMP.W       #$023C,D6
+            BEQ         _ANDI_CCR
+            CMP.W       #$027C,D6
+            BEQ         _ANDI_SR 
+            CMP.W       #$0A3C,D6
+            BEQ         _EORI_CCR
+            CMP.W       #$0A7C,D6
+            BEQ         _EORI_SR        
+            CMP.W       #$4AFC,D6
+            BEQ         _ILLEGAL
+            CMP.W       #$4E70,D6
+            BEQ         _RESET      
+            CMP.W       #$4E72,D6
+            BEQ         _STOP
+            CMP.W       #$4E73,D6
+            BEQ         _RTE  
+            CMP.W       #$4E76,D6
+            BEQ         _TRAPV      
+            CMP.W       #$4E77,D6
+            BEQ         _RTR
+********************************************End Non Required***********************************************************************       
             CMP.W       #$4E71,D6
             BEQ         _NOP
             CMP.W       #$4E75,D6
             BEQ         _RTS
+**************************************Non Required**************************************************************************         
+            MOVE.W      D6,D5           ;MOVE WORD INTO D5 TO GET WORKED ON
+            LSR.W       #4,D5           ;Shift and mask bits
+            LSL.W       #4,D5           ;Shift and mask bits
+            CMP.W       #$4E40,D5
+            BEQ         _TRAP        
+**************************************End Non Required*************************************************************************     
             MOVE.W      D6,D5           ;MOVE WORD INTO D5 TO GET WORKED ON
             LSR.W       #8,D5           ;Shift and mask bits
             LSR.W       #4,D5               
@@ -658,7 +691,170 @@ UNDEFINED   *Used for DATA printing
             MULU.W  #8,D2           *For offset
             JSR     (A4,D2)         *Convert current value from memory to hex
             RTS
-           
+**********************************************************************************************          
+_ORI_CCR
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'I',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+
+            CLR         D4
+            MOVE.B      #2,D4
+            JSR         IMMEDIATE
+            MOVE.B      #',',(A2)+
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'R',(A2)+
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ORI_SR
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'I',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #' ',(A2)+
+            CLR         D4
+            MOVE.B      #4,D4
+            JSR         IMMEDIATE
+            MOVE.B      #',',(A2)+
+            MOVE.B      #'S',(A2)+
+            MOVE.B      #'R',(A2)+
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ANDI_CCR
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'N',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'I',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            CLR         D4
+            MOVE.B      #2,D4
+            JSR         IMMEDIATE
+            MOVE.B      #',',(A2)+
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'R',(A2)+
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ANDI_SR
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'N',(A2)+
+            MOVE.B      #'D',(A2)+
+            MOVE.B      #'I',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            CLR         D4
+            MOVE.B      #4,D4
+            JSR         IMMEDIATE
+            MOVE.B      #',',(A2)+
+            MOVE.B      #'S',(A2)+
+            MOVE.B      #'R',(A2)+
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_EORI_CCR
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'I',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            CLR         D4
+            MOVE.B      #2,D4
+            JSR         IMMEDIATE
+            MOVE.B      #',',(A2)+
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'C',(A2)+
+            MOVE.B      #'R',(A2)+
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_EORI_SR
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'I',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            CLR         D4
+            MOVE.B      #4,D4
+            JSR         IMMEDIATE
+            MOVE.B      #',',(A2)+
+            MOVE.B      #'S',(A2)+
+            MOVE.B      #'R',(A2)+
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_ILLEGAL
+            MOVE.B      #'I',(A2)+
+            MOVE.B      #'L',(A2)+
+            MOVE.B      #'L',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'G',(A2)+
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'L',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_RESET
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'S',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #'T',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_STOP
+            MOVE.B      #'S',(A2)+
+            MOVE.B      #'T',(A2)+
+            MOVE.B      #'O',(A2)+
+            MOVE.B      #'P',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            CLR         D4
+            MOVE.B      #4,D4
+            JSR         IMMEDIATE
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_RTE
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'T',(A2)+
+            MOVE.B      #'E',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_TRAPV
+            MOVE.B      #'T',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'P',(A2)+
+            MOVE.B      #'V',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_RTR
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'T',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+_TRAP
+            MOVE.B      #'T',(A2)+
+            MOVE.B      #'R',(A2)+
+            MOVE.B      #'A',(A2)+
+            MOVE.B      #'P',(A2)+
+            MOVE.B      #9,(A2)+        ;tab
+            MOVE.B      #9,(A2)+        ;tab
+            JSR         PRINT           ;print the buffer
+            BRA         NEXT_CODE       ;back to beggining, clear working registers and CCR
+**********************************************************************************************     
 _NOP
             MOVE.B      #'N',(A2)+
             MOVE.B      #'O',(A2)+
@@ -2463,7 +2659,7 @@ IMMEDIATE
             MOVE.B  #'$',(A2)+
             CMP.B   #2, D4     
             BEQ     IMEDBYTE   *Check if byte data
-            CMP.B    #4, D4     
+            CMP.B   #4, D4     
             BEQ     IMEDWORD   *Check if word data
             CMP.B   #8, D4     
             BEQ     IMEDLONG   *Check if long data
@@ -3070,5 +3266,21 @@ TESTPOG6
           MOVEA     -(A3),A4
           MOVEA     D3,A1
           MOVE.L    #$FFFFFFFF,D0
+          
+TESTPOG7
+*
+          ANDI      #15,CCR 
+          ANDI      #15,SR   
+          ORI       #15,CCR 
+          ORI       #15,SR   
+          EORI      #15,CCR 
+          EORI      #15,SR    
+          RESET
+          RTE
+          STOP      #1
+          ILLEGAL
+          TRAP      #15
+          RTR
+          
           
     END    START        ; last line of source
