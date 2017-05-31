@@ -2382,9 +2382,8 @@ DISPLACEMENT ;special case for BRA instructions
 
 * Case for displacement being 32 bits or 8 bytes -----------------------------
 LONGDISP
-            MOVEA.L     A6,A5                           * move A6 into A5
-	        ADD.L	    #4,A6				            * increment the long 
-            MOVE.L      (A5),D1                         * move content in inside the address A5 into D1
+            MOVE.L      A6,D0                           * move A6 into D0
+            MOVE.L      (A6)+,D1                        * move displacement value inside address A6 into D1
             
             CMP.L       #$7FFFFFFF,D1                   * compare if D1 is less than 7FFFFFFF
             BLT         DISPLACE_POSITIVE               * branch to DISPLAY_POSITIVE
@@ -2392,8 +2391,8 @@ LONGDISP
 
 * Case for displacement being only 16 bits or 4 bytes ------------------------
 WORDISP
-            MOVEA.L     A6,A5                           * move A6 into A5
-            MOVE.W      (A5),D1                         * move content in inside the address A5 into D1
+            MOVE.L      A6,D0                           * move A6 into D0
+            MOVE.W      (A6)+,D1                        * move displacement value inside address A6 into D1
             
             CMPI.L      #$7FFF,D1                       * compare if D1 is less than 7FFF
             BLT         DISPLACE_POSITIVE               * branch to DISPLAY_POSITIVE
@@ -2401,14 +2400,12 @@ WORDISP
 
 * Used for positive displacement or displacement that adds to the existing address -----------
 DISPLACE_POSITIVE
-            MOVE.L      A6,D0                           * move A6 into D0
             ADD.L       D1,D0                           * add D1 to D0
             CLR         D2                              * clear D2
             BRA         INSERT_DISPLACEMENT             * branch to INSERT_DISPACEMENT
             
 * Used for negative displacement or displacement that subtracts from the existing address ----
 DISPLACE_NEGATIVE
-            MOVE.L      A6,D0                           * move A6 into D0
             NEG.W       D1                              * 2s compliment D1
             SUB.L       D1,D0                           * subtract D1 from D0
             CLR         D2                              * clear D2       
